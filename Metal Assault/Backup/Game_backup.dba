@@ -1,0 +1,131 @@
+Rem *** Include File: Game.dba ***
+Rem Created: 30/08/2007 22:14:12
+
+Rem Included in Project: C:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+game:
+break
+set dir CheminMA$+"\Anims"
+load animation "Chargement.avi",1
+place animation 1,0,0,param(35),param(36)
+loop animation 1
+wait 2
+global radius# as double float : radius# = 20.0 : rem la ditance minimale entre le perso et un mur...
+rem a laisser vide pour éviter les bugs de la gravitée (c'est la faute de DBP)
+global tailleperso# as double float : tailleperso# = 80 : rem 100 fait environ 2m
+global genouperso# as double float : genouperso# = 22.5
+
+break
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+load object game_carte$+".x",6
+sc_setupComplexObject 6,1,2
+make object sphere 10,8000,15,60
+set camera range 10,20000
+scale object 10,-150,-150,-150
+load image "sky.jpg",10
+texture object 10,10
+rotate object 10,180,140,0
+
+place animation 1,0,0,0,0
+delete animation 1
+
+delete sprite 4
+
+delete sprite 5
+
+delete sprite 6
+
+delete sprite 7
+
+
+
+rem set display mode param(35),param(36),param(37) : autocam off : randomize timer()
+sync on : sync rate 40
+make object sphere 2,radius#
+   position object 2,-80,15,-20
+   sc_setupObject 2,0,1
+   hide object 2
+   disable object zwrite 2
+   make object sphere 4,radius#/2
+   position object 4,-80,15,-20
+   sc_setupObject 4,0,1
+   hide object 4
+   disable object zwrite 4
+   make object sphere 3,radius#/5
+   position object 3,-80,5,-20
+   sc_setupObject 3,0,1
+   hide object 3
+   disable object zwrite 3
+   set camera range 1,30000
+do
+set cursor 0,0
+print screen fps()
+print statistic(1)
+print collide
+print collide3
+   inc camx#,mousemovex()/3.0
+   inc camy#,mousemovey()/3.0
+   rotate camera camy#,camx#,0
+   oldx# = object position x(3)
+   oldy# = object position y(3)
+   oldz# = object position z(3)
+   oldx2# = object position x(2)
+   oldy2# = object position y(2)
+   oldz2# = object position z(2)
+   oldx3# = object position x(4)
+   oldy3# = object position y(4)
+   oldz3# = object position z(4)
+if upkey()=1 then x#=newxvalue(x#,camX#,8) : z#=newzvalue(z#,camx#,8):rem  y#=newyvalue(y#,camy#,8)
+if downkey()=1 then x#=newxvalue(x#,camx#,-8) : z#=newzvalue(z#,camx#,-8):rem  y#=newyvalue(y#,camy#,-8)
+if rightkey() = 1 then X# = NewXValue(X#,camx#+90,5): Z# = NewZValue(Z#,camx#+90,5):rem y#=newyvalue(y#,camy#,5)
+if leftkey() = 1 then X# = NewXValue(X#,camx#-90,5): Z# = NewZValue(Z#,camx#-90,5):rem y#=newyvalue(y#,camy#,5)
+position object 3,x#,y#,z#
+position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   x2# = object position x(3)
+   y2# = object position y(3)
+   z2# = object position z(3)
+   x3# = object position x(2)
+   y3# = object position y(2)
+   z3# = object position z(2)
+   x4# = object position x(4)
+   y4# = object position y(4)
+   z4# = object position z(4)
+ rem gravitée
+ dec y#,gravite#
+ collide = sc_SphereSlideGroup(1,oldx2#,oldy2#-45,oldz2#,x3#,y3#-45,z3#,radius#,0)
+   if collide>0
+      x# = sc_getCollisionSlideX()
+      y# = sc_getCollisionslideY()/5
+      z# = sc_getCollisionSlideZ()
+      position object 3,x#,y#,z#
+      position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   endif
+
+rem la fin de la gravitée si on touche par terre
+   collide2 = sc_SphereSlideGroup(1,oldx#,oldy#,oldz#,x2#,y2#,z2#,radius#,0)
+   if collide2>0
+      y# = sc_getCollisionslideY()
+      position object 3,x#,y#,z#
+      position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   endif
+
+ collide3 = sc_SphereSlideGroup(1,oldx3#,oldy3#,oldz3#,x4#,y4#,z4#,radius#,0)
+   if collide3>0 and collide=0 :rem and (x# not oldx# or z# not oldz# )
+     inc y#,gravite#+0.1
+     position object 3,x#,y#,z#
+     position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+     position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+     position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   endif
+
+   sc_updateObject 2
+   sc_updateObject 3
+   sc_updateObject 4
+   sync
+loop
+

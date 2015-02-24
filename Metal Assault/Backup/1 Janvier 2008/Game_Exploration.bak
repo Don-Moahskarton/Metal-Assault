@@ -1,0 +1,37 @@
+Rem *** Include File: Game_Exploration.dba ***
+Rem Created: 09/12/2007 12:55:40
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+Exploration:
+do
+position mouse 0,0
+set cursor 0,0
+FPS = screen fps()
+print fps
+if Game_comptearebour = 0
+center text param(35)/2,param(36)/2,game_carte$
+center text param(35)/2,param(36)/2+32,"Apuyez sur tir pour commencer"
+endif
+vitesse_joueur# = ((FPS*-1)+400)/20
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.2
+camx#=camx#+mousemoveX()*0.2
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera curveangle(camx#,oldcamx#,25)
+xrotate camera curveangle(camy#,oldcamy#,25)
+if upkey()=1 then move camera vitesse_joueur#
+if downkey()=1 then move camera -vitesse_joueur#
+if mouseclick() = 1 and Game_comptearebour = 0
+Game_comptearebour = 1 : comptearebour = 100
+endif
+if Game_comptearebour = 1
+set cursor param(35)/2,param(36)/2
+print comptearebour
+set cursor 0,0
+comptearebour = comptearebour - ((FPS*-1)+400)/200
+endif
+if comptearebour < 0 then goto Game_trans
+loop

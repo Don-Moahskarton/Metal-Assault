@@ -1,0 +1,148 @@
+Rem *** Include File: Market_armour.dba ***
+Rem Created: 15/05/2008 11:29:34
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Market_armure:
+Autocam On
+position camera 0,0,0
+set dir CheminMA$+"\Jpegs\jeu\market"
+load image "armor.jpg",17,1
+set dir  CheminMA$+"\Models\Armures H\"
+load object "Humain Top model.X",1
+load object "Ultra Légere.X",2
+load object "Légere.X",3
+load object "poly.x",4
+load object "Lourde.X",5
+load object "Ultra Lourde.X",6
+make object plain 7,1024,768
+make light 1
+
+
+texture object 7,17
+rotate object 7,object angle X(7)-10,object angle y(7),object angle Z(7)
+move camera 730
+scale object 1,70,80,80
+position object 1,-160,50,-300
+set object 1,0,1,0
+point object 1,camera position X()-160,camera position y()-50,camera position Z()
+
+scale object 2,70,80,80
+position object 2,-160,-90,-300
+hide object 2
+scale object 3,70,80,80
+position object 3,-160,-90,-300
+hide object 3
+scale object 4,70,80,80
+position object 4,-160,-90,-300
+hide object 4
+scale object 5,70,80,80
+position object 5,-160,-90,-300
+hide object 5
+scale object 6,70,80,80
+position object 6,-160,-90,-300
+hide object 6
+
+do
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+inc a,Extrapolation
+yrotate object 1,a
+yrotate object 2,a
+yrotate object 3,a
+yrotate object 4,a
+yrotate object 5,a
+yrotate object 6,a
+if boutton2(564,45,914,175)
+armure_type = 1 : rem encore inutilisé car la seule UI dispo
+Game_armure_force = 10 : rem on est capable de proter 15kg
+Coeff_Vitesse_Joueur# = 2
+exit
+endif
+if survol(564,45,914,175)
+show object 2
+else
+hide object 2
+endif
+if boutton2(564,175,914,314)
+armure_type = 2 : rem encore inutilisé car la seule UI dispo
+Game_armure_force = 15 : rem on est capable de proter 15kg
+Coeff_Vitesse_Joueur# = 1.5
+exit
+endif
+if survol(564,175,914,314)
+show object 3
+else
+hide object 3
+endif
+if boutton2(564,314,914,456)
+armure_type = 3 : rem encore inutilisé car la seule UI dispo
+Game_armure_force = 15 : rem on est capable de proter 15kg
+Coeff_Vitesse_Joueur# = 1.0
+exit
+endif
+if survol(564,314,914,456)
+show object 4
+else
+hide object 4
+endif
+if boutton2(564,456,914,594)
+armure_type = 4 : rem encore inutilisé car la seule UI dispo
+Game_armure_force = 20
+Coeff_Vitesse_Joueur# = 0.75
+exit
+endif
+if survol(564,465,914,594)
+show object 5
+else
+hide object 5
+endif
+if boutton2(564,594,914,723)
+armure_type = 5 : rem encore inutilisé car la seule UI dispo
+Game_armure_force = 75 : rem on est capable de proter 15kg
+Coeff_Vitesse_Joueur# = 0.5
+exit
+endif
+if survol(564,594,914,723)
+show object 6
+else
+hide object 6
+endif
+loop
+
+delete object 1
+delete object 2
+delete object 3
+delete object 4
+delete object 5
+delete object 6
+delete object 7
+delete image 17
+Autocam Off
+return
+
+
+
+
+
+
+
+
+
+
+
+
+texture object 2,1
+rotate object 2,object angle X(2)-10,object angle y(2),object angle Z(2)
+move camera 730
+
+scale object 1,70,80,80
+position object 1,-160,50,-300
+set object 1,0,1,0
+point object 1,camera position X()-160,camera position y()-50,camera position Z()
+
+do
+inc a
+yrotate object 1,a
+
+loop

@@ -1,0 +1,104 @@
+Rem *** Include File: Scores.dba ***
+Rem Created: 02/07/2008 10:58:09
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Scores:
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "Scores.jpg",18
+set sprite alpha 18,255
+show sprite 18
+set text size 16
+
+if mort = 0
+Bonus = Frag * 500
+Player_stats(0) = Player_stats(0) + Bonus
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+endif
+
+do
+sprite 18,0,0,18
+set sprite alpha 18,100
+
+set text to bold
+ink RGB(128,128,255),0
+set cursor 70,63
+print Configjoueur$
+set cursor 455,63
+print Frag
+set cursor 650,63
+print mort
+set cursor 865,63
+print Frag/mort
+set text to normal
+
+for t = 0 to nballies-1
+set cursor 70,83+t*20
+print allie(0).name$
+set cursor 455,83+t*20
+print allie(0).frag
+set cursor 650,83+t*20
+print allie(0).mort
+set cursor 865,83+t*20
+print allie(0).frag/bot(0).mort
+next t
+
+ink RGB(255,0,0),0
+for t = nballies-1 to nballies-1+NbBot-1
+set cursor 70,83+t*20
+print bot(0).name$
+set cursor 455,83+t*20
+print bot(0).frag
+set cursor 650,83+t*20
+print bot(0).mort
+set cursor 865,83+t*20
+print bot(0).frag/bot(0).mort
+next t
+
+
+if Match_Mort_RHL_PTS > Match_Mort_CID_PTS
+center text param(35)/2,param(36)/2+50,"La RHL l'emporte !"
+else
+center text param(35)/2,param(36)/2+50,"La CID l'emporte !"
+endif
+if mort = 0
+center text param(35)/2,param(36)/2+80,"Pas De Failles ! Bonus : " + str$(Bonus) +"€"
+endif
+
+if escapekey() = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+close file 1
+delete animation 1
+for t = 1 to 60000
+if object exist(t) = 1 then delete object t
+next t
+for t = 1 to 60000
+if image exist(t) = 1 then delete image t
+next t
+for t = 1 to 60000
+if sprite exist(t) = 1 then delete sprite t
+next t
+for t = 1 to 60000
+if sound exist(t) = 1 then delete sound t
+next t
+for t = 1 to 60000
+if light exist(t) = 1 then delete light t
+next t
+for t = 1 to 60000
+if object exist(t)
+SC_setupObject t,0,0
+SC_removeObject t
+endif
+next t
+goto debut
+endif
+loop
+
+return

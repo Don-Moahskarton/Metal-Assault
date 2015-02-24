@@ -1,0 +1,3 @@
+Chemin de Metal Assault
+dernière config utilisée (pour chargement auto)
+lire l'intro ?             0 = non           1 = oui

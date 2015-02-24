@@ -1,0 +1,14 @@
+if file exist("Index.ini") then delete file "Index.ini"
+open to write 1,"Index.ini"
+cartes# = 8
+write float 1,Cartes#
+write string 1,"Rivière sombre"
+write string 1,"Bigorneau"
+write string 1,"Duel Penché"
+write string 1,"Route Infernale"
+write string 1,"Bigorneau Reload"
+write string 1,"Corrosif"
+write string 1,"Labirinter"
+write string 1,"Hider"
+close file 1
+end

@@ -1,0 +1,60 @@
+Rem *** Include File: Multi_Rejoindre.dba ***
+Rem Created: 19/04/2008 17:27:19
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Multi_Rejoindre:
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+delete object 1
+set image colorkey 0,252,0
+load image "Multi_PartieSelect.jpg",4,1
+Multi_Rejoindre_etatptispoints# = 0
+
+
+do
+rem l'extrapolation
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+print Extrapolation
+OldExtrapolationTimer=NewExtrapolationTimer
+rem le boutton retour
+if boutton2(0,84,220,134)
+delete image 4
+show sprite 1
+show sprite 2
+set image colorkey 0,0,0
+goto debut
+endif
+rem l'affichage
+paste image 4,0,0,4
+if Multi_Rejoindre_etatptispoints# = 0
+set cursor 70,200
+print "Recherche d'un serveur"
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 0 and  Multi_Rejoindre_etatptispoints# <= 1
+set cursor 70,200
+print "Recherche d'un serveur"
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 1 and  Multi_Rejoindre_etatptispoints# <= 2
+set cursor 70,200
+print "Recherche d'un serveur."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 2 and  Multi_Rejoindre_etatptispoints# <= 3
+set cursor 70,200
+print "Recherche d'un serveur.."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 3
+set cursor 70,200
+print "Recherche d'un serveur..."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 4
+Multi_Rejoindre_etatptispoints# = 0
+endif
+loop
+

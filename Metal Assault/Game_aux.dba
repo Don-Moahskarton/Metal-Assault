@@ -1,0 +1,223 @@
+Rem *** Include File: Game_aux.dba ***
+Rem Created: 29/03/2008 10:24:35
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+dam_warn:
+if dam_warn > 1
+show sprite 18
+sprite 18,0,0,18
+set sprite alpha 18,dam_warn
+dec dam_warn,10
+if dam_warn <= 1 then hide sprite 18
+endif
+return
+
+skyfrag:
+if script_found  =1
+if sc_spherecast(5,oldx3#,oldy3#,oldz3#,x4#,y4#,z4#,radius#,0)
+vie = 0
+endif
+for i = 0 to nbBot-1
+if sc_spherecast(5,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,radius#,0)
+Bot(i).Vie = 0
+endif
+next i
+endif
+return
+
+
+rotate_sky:
+if rotate_sky_x = 1 then xrotate object 5,temporel*sky_speed
+if rotate_sky_y = 1 then yrotate object 5,temporel*sky_speed
+if rotate_sky_z = 1 then zrotate object 5,temporel*sky_speed
+return
+
+Reaprovisionement_Muns:
+if object exist(1257) =1
+if distance(3,1257) < 150 and reapp_etat = 0 and Player_stats(0) >= (listarme(game_arme_coress(arme)-1000).price)/100
+reapp_etat = 1
+inc listarme(game_arme_coress(arme)-1000).bulets_Stock,5
+dec Player_stats(0),(listarme(game_arme_coress(arme)-1000).price)/10
+else
+reapp_etat = 0
+endif
+endif
+return
+
+
+switch_gameplay:
+if gameplay_Type = 1
+
+for t = 0 to nb_goliath-1
+if object exist(t+1281) =1
+if distance(3,t+1281) < 500
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+gameplay_Type = 2
+Dans_le_goliath_le_joueur_est = 1
+Goliath_number = 1281+t
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+
+if nb_Vautour > 0
+for t = 0 to nb_Vautour-1
+if object exist(t+1701) =1
+if distance(3,t+1701) < 700
+New_txt(3,"Vautour",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 0
+Vautour_number = t
+Vautours(Vautour_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+if nb_escompide > 0
+for t = 0 to nb_escompide-1
+if object exist(t+1801) =1
+if distance(3,t+1801) < 700
+New_txt(3,"Escompide",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 1
+escompide_number = t
+escompides(escompide_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+if nb_v2ci
+for t = 0 to nb_v2ci-1
+if object exist(t+2001) =1
+if distance(3,t+2001) < 700
+New_txt(3,"V2CI",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 2
+v2ci_number = t
+v2cis(escompide_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+if nb_MotoD > 0
+for t = 0 to nb_MotoD-1
+if object exist(t+2101) =1
+if distance(3,t+2101) < 700
+New_txt(3,"Moto Droide",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 3
+MotoD_number = t
+MotoDs(MotoD_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+if nb_coleoptere > 0
+for t = 0 to nb_coleoptere-1
+if object exist(t+2201) =1
+if distance(3,t+2201) < 1000
+New_txt(3,"Char Coléoptère",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 4
+coleoptere_number = t
+coleopteres(coleoptere_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+if nb_FAucon > 0
+for t = 0 to nb_FAucon-1
+if object exist(t+2401) =1
+if distance(3,t+2401) < 1000
+New_txt(3,"Char Faucon",26,255,255,255,screen width()/2,screen height()/2+150,256,258)
+show sprite 24
+if keystate(18) = 1
+hide sprite 24
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+hide sprite 15 : rem le réticule
+gameplay_Type = 3
+Vehicule_type = 5
+FAucon_number = t
+FAucons(FAucon_number).pilote_occupe = 1
+endif
+else
+hide sprite 24
+endif
+endif
+next t
+endif
+
+endif
+return
+

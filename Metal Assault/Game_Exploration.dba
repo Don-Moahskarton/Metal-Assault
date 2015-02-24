@@ -1,0 +1,111 @@
+Rem *** Include File: Game_Exploration.dba ***
+Rem Created: 09/12/2007 12:55:40
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+
+Exploration:
+rem la musique
+set dir CheminMA$+"\Musiques\"
+if music exist(1) = 1
+stop music 1
+delete music 1
+endif
+load music "Exploration.mp3",1
+set music volume 1,30
+loop music 1
+
+do
+sync
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+dec Game_Effect_fondu_alpha,Extrapolation/4
+if Game_Effect_fondu_alpha < 0 then Game_Effect_fondu_alpha = 0 : hide sprite 4
+if Game_Effect_fondu_alpha > 0 then set sprite alpha 4,Game_Effect_fondu_alpha
+x# = camera position X()
+Y# = camera position Y()
+Z# = camera position Z()
+rem l'eau
+if water > 0
+rem UpDate_old_eau(1)
+UpDate_ocean(1)
+UpDate_ocean(2)
+endif
+break
+if Water_moving > 0
+Move_ocean(1,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+if Game_eau_Sommov = 1  and WatermovYbool = 0
+Move_ocean(2,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+endif
+if Game_eau_Sommov = 2  and WatermovYbool = 0
+Move_ocean(2,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+Move_ocean(3,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+Move_ocean(4,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+endif
+if Game_eau_Sommov = 2  and WatermovYbool = 1
+Move_ocean(2,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+endif
+if Game_eau_Sommov = 3
+Move_ocean(2,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+Move_ocean(3,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+Move_ocean(4,Game_eau_Vectorx,Game_eau_Vectory,Game_eau_Vectorz)
+endif
+endif
+if Game_Carte_parallax = 1
+set vector4 1,camera position x(),camera position y(),camera position z(),0
+for t = 256 to 512
+         if effect exist(t) then set effect constant vector t,"LightPosition",1
+next t
+endif
+position mouse 0,0
+set cursor 0,0
+FPS = screen fps()
+print "Fps :",fps
+print "Polygones :", statistic(1)
+remstart
+print "Ocean n°1"
+print "X : ",object position x(6),"Y : ",object position y(6),"Z : ",object position z(6)
+print
+print "Ocean n°2"
+print "X : ",object position x(7),"Y : ",object position y(7),"Z : ",object position z(7)
+remend
+if object exist(10004) then print "10004 exist"
+set cursor param(35)-200,0
+ink RGB(0,0,255),0
+print "X : ",x#
+set cursor param(35)-200,30
+ink RGB(0,255,0),0
+print "Y : ",y#
+set cursor param(35)-200,60
+ink RGB(255,0,0),0
+print "Z : ",z#
+ink rgb(255,255,255),0
+if Game_comptearebour = 0
+center text param(35)/2,param(36)/2,game_carte$
+center text param(35)/2,param(36)/2+32,"Apuyez sur tir pour commencer"
+endif
+vitesse_joueur# = ((FPS*-1)+400)/20
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.2
+camx#=camx#+mousemoveX()*0.2
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera curveangle(camx#,oldcamx#,25)
+xrotate camera curveangle(camy#,oldcamy#,25)
+if upkey()=1 or KEYSTATE(param(48)) = 1 then move camera vitesse_joueur#
+if downkey()=1 or KEYSTATE(param(49)) = 1 then move camera -vitesse_joueur#
+if mouseclick() = 1 and Game_comptearebour = 0
+Game_comptearebour = 1 : comptearebour = 100
+endif
+if Game_comptearebour = 1
+set cursor param(35)/2,param(36)/2
+print comptearebour
+set cursor 0,0
+comptearebour = comptearebour - ((FPS*-1)+400)/200
+endif
+if comptearebour < 0 then goto Game_trans
+vitesse_joueur# = Extrapolation*Coeff_Vitesse_Joueur#*1.2
+loop
+

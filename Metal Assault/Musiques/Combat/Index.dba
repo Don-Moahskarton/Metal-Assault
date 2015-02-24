@@ -1,0 +1,12 @@
+open to write 1,"Index.ini"
+Zik# = 6
+write float 1,Zik#
+write string 1,"Baston.mp3"
+write string 1,"Combat 02.mp3"
+write string 1,"Combat 03.mp3"
+write string 1,"Machine Head - imperium.mp3"
+write string 1,"Robot rock.mp3"
+write string 1,"Rock loop.mp3"
+close file 1
+end
+

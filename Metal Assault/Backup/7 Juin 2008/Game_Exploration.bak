@@ -1,0 +1,61 @@
+Rem *** Include File: Game_Exploration.dba ***
+Rem Created: 09/12/2007 12:55:40
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+
+Exploration:
+rem la musique
+set dir CheminMA$+"\Musiques\"
+if music exist(1) = 1
+stop music 1
+delete music 1
+endif
+load music "Exploration.mp3",1
+set music volume 1,30
+loop music 1
+
+do
+x# = camera position X()
+Y# = camera position Y()
+Z# = camera position Z()
+position mouse 0,0
+set cursor 0,0
+FPS = screen fps()
+print fps
+set cursor param(35)-200,0
+ink RGB(0,0,255),0
+print "X : ",x#
+set cursor param(35)-200,30
+ink RGB(0,255,0),0
+print "Y : ",y#
+set cursor param(35)-200,60
+ink RGB(255,0,0),0
+print "Z : ",z#
+ink rgb(255,255,255),0
+if Game_comptearebour = 0
+center text param(35)/2,param(36)/2,game_carte$
+center text param(35)/2,param(36)/2+32,"Apuyez sur tir pour commencer"
+endif
+vitesse_joueur# = ((FPS*-1)+400)/20
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.2
+camx#=camx#+mousemoveX()*0.2
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera curveangle(camx#,oldcamx#,25)
+xrotate camera curveangle(camy#,oldcamy#,25)
+if upkey()=1 or KEYSTATE(param(48)) = 1 then move camera vitesse_joueur#
+if downkey()=1 or KEYSTATE(param(49)) = 1 then move camera -vitesse_joueur#
+if mouseclick() = 1 and Game_comptearebour = 0
+Game_comptearebour = 1 : comptearebour = 100
+endif
+if Game_comptearebour = 1
+set cursor param(35)/2,param(36)/2
+print comptearebour
+set cursor 0,0
+comptearebour = comptearebour - ((FPS*-1)+400)/200
+endif
+if comptearebour < 0 then goto Game_trans
+loop

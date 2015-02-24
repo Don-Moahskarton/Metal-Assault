@@ -1,0 +1,78 @@
+ink RGB(255,0,0),0
+print "ATTENTION LE FICHIER Index LOCAL SERA DETRUIT !"
+ink RGB(255,255,255),0
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+rem ==================================================== Editions des Sons ===================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+
+rem sa, faut pas toucher, c'est le ceur de l'ExE
+print "Apuyez sur une touche pour continuer..."
+wait key
+if file exist("index.ini") = 1 then delete file "index.ini"
+open to write 1,"index.ini"
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem Ici, c''est le nombre de sons que tu met, sous la forme : write file 1,le nombre
+write file 1,25
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+Rem =============================================================================================================================
+rem leurs noms
+write string 1,"Boum.wav"
+write string 1,"C'est combien le KG de metal.wav"
+write string 1,"Cible eparpilles.wav"
+write string 1,"Cible HS.wav"
+write string 1,"Cible trouee.wav"
+write string 1,"Elle est ou la boitte.wav"
+write string 1,"Et moi qui les croyaient indestructibles.wav"
+write string 1,"J'esperre un MAJ.wav"
+write string 1,"La grande classe.wav"
+write string 1,"Plein de monde en enfer.wav"
+write string 1,"Sa fait mal, hein.wav"
+write string 1,"Service apres vente.wav"
+write string 1,"Tir plus vite, yaura pas de prochaine fois.wav"
+write string 1,"tir plus vite.wav"
+write string 1,"Trop lour et pas assez rapide.wav"
+write string 1,"Yen aura pour tt le monde.wav"
+write string 1,"tout cuit.wav"
+write string 1,"Chaud.wav"
+write string 1,"Comestible.wav"
+write string 1,"Contact.wav"
+write string 1,"sous garantie.wav"
+write string 1,"bouge pus.wav"
+write string 1,"et c'est solide.wav"
+write string 1,"saloprie.wav"
+write string 1,"ten redemande.wav"
+rem toujours pas toucher ce qui suit, sa sauvegarde
+close file 1
+
+rem ============================================================================================================================================
+ink RGB(100,100,100),0
+print
+print "======================="
+print "/\_/\_/\_/\_/\_/\_/\_/\"
+print "======================="
+print
+ink RGB(255,255,255),0
+
+if file exist ("index.ini") = 1
+open to read 1,"index.ini"
+read file 1,game_repawn_point_nb
+print game_repawn_point_nb
+for t = 1 to game_repawn_point_nb
+read string 1,temp$
+print temp$
+next t
+endif
+close file 1
+
+wait 500
+wait key
+

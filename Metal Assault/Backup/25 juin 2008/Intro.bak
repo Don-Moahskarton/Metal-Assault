@@ -1,0 +1,58 @@
+
+
+Rem *** Include File: Intro.dba ***
+Rem Created: 11/12/2007 20:45:37
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+intro:
+set dir CheminMA$+"\jpegs\menu"
+set image colorkey 25,25,2
+load image "Intro01.jpg",1,1
+sprite 1,0,0,1
+size sprite 1,param(35),param(36)
+set sprite diffuse 1,0,0,0
+for t = 0 to 255
+set sprite diffuse 1,t,t,t
+wait 1
+if escapekey() = 1 then goto intro_video
+next t
+wait 500
+x= 256
+for t = 0 to 124
+dec x,2
+set sprite diffuse 1,x,x,x
+wait 1
+if escapekey() = 1 then goto intro_video
+next t
+
+intro_video:
+
+delete image 1
+delete sprite 1
+set image colorkey 0,0,0
+
+rem la musique
+set dir CheminMA$+"\musiques"
+load music "menu.mp3",1
+loop music 1
+set music volume 1,30
+
+rem l'intro
+set dir CheminMA$+"\anims"
+load animation "Intro.avi",1
+place animation 1,0,0,param(35),param(36)
+play animation 1
+set animation speed 1,125
+repeat
+until animation playing(1) = 0 or returnkey() = 1 or escapekey() = 1
+stop animation 1
+place animation 1,0,0,1,1
+delete animation 1
+
+return
+
+
+
+
+

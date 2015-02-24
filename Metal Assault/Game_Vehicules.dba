@@ -1,0 +1,529 @@
+Rem *** Include File: Game_Vehicules.dba ***
+Rem Created: 23/08/2008 22:05:28
+
+Rem Included in Project: D:\Metal Assault\Metal Assault.dbpro
+game_Vehicules:
+
+
+
+
+
+for t = 0 to nb_vautour-1
+      Vautours(t).oldx# = object position x(t+1701)
+      Vautours(t).oldy# = object position y(t+1701)
+      Vautours(t).oldz# = object position z(t+1701)
+next t
+
+for t = 0 to nb_Escompide-1
+      Escompides(t).oldx# = object position x(t+1801)
+      Escompides(t).oldy# = object position y(t+1801)
+      Escompides(t).oldz# = object position z(t+1801)
+next t
+
+for t = 0 to nb_v2ci-1
+      v2cis(t).oldx# = object position x(t+2001)
+      v2cis(t).oldy# = object position y(t+2001)
+      v2cis(t).oldz# = object position z(t+2001)
+next t
+
+for t = 0 to nb_motoD-1
+      motoDs(t).oldx# = object position x(t+2101)
+      motoDs(t).oldy# = object position y(t+2101)
+      motoDs(t).oldz# = object position z(t+2101)
+next t
+
+for t = 0 to nb_coleoptere-1
+      coleopteres(t).oldx# = object position x(t+2201)
+      coleopteres(t).oldy# = object position y(t+2201)
+      coleopteres(t).oldz# = object position z(t+2201)
+next t
+
+for t = 0 to nb_Faucon-1
+      faucons(t).oldx# = object position x(t+2401)
+      faucons(t).oldy# = object position y(t+2401)
+      faucons(t).oldz# = object position z(t+2401)
+next t
+
+if gameplay_Type = 3
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem =============================================Vautour=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+
+if Vehicule_type = 0
+print
+print "X: ",object position x(Vautour_number+1701)," Y: ",object position y(Vautour_number+1701)," Z: ",object position z(Vautour_number+1701)
+print "Xspeed : ", Vautours(Vautour_number).xspeed#
+print "Yspeed : ", Vautours(Vautour_number).yspeed#
+
+inc Vautours(Vautour_number).anglX#,mousemoveX()/5
+inc Vautours(Vautour_number).anglY#,mousemoveY()/5
+rotate object Vautour_number+1701,Vautours(Vautour_number).anglY#,Vautours(Vautour_number).anglX#,0
+if KEYSTATE(param(48)) then inc Vautours(Vautour_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec Vautours(Vautour_number).xspeed#,0.1
+if Vautours(Vautour_number).xspeed# > 2 then Vautours(Vautour_number).xspeed# = 2
+if Vautours(Vautour_number).xspeed# < -1.5 then Vautours(Vautour_number).xspeed# = -1.5
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if Vautours(Vautour_number).xspeed# > 0 then dec Vautours(Vautour_number).xspeed#,0.1
+if Vautours(Vautour_number).xspeed# < 0 then inc Vautours(Vautour_number).xspeed#,0.1
+if Vautours(Vautour_number).xspeed# > 0 then dec Vautours(Vautour_number).xspeed#,0.1
+if Vautours(Vautour_number).xspeed# < 0 then inc Vautours(Vautour_number).xspeed#,0.1
+if Vautours(Vautour_number).xspeed# < 0.1 and Vautours(Vautour_number).xspeed# > -0.1 then Vautours(Vautour_number).xspeed# = 0
+endif
+move object Vautour_number+1701,Vautours(Vautour_number).xspeed#*Extrapolation*1.5
+if KEYSTATE(param(51)) then inc Vautours(Vautour_number).yspeed#,0.1
+if KEYSTATE(param(50)) then dec Vautours(Vautour_number).yspeed#,0.1
+if Vautours(Vautour_number).yspeed# > 1.5 then Vautours(Vautour_number).yspeed# = 1.5
+if Vautours(Vautour_number).yspeed# < -1.5 then Vautours(Vautour_number).yspeed# = -1.5
+if KEYSTATE(param(51))=0 and KEYSTATE(param(50))=0
+if Vautours(Vautour_number).yspeed# > 0 then dec Vautours(Vautour_number).yspeed#,0.1
+if Vautours(Vautour_number).yspeed# < 0 then inc Vautours(Vautour_number).yspeed#,0.1
+if Vautours(Vautour_number).yspeed# > 0 then dec Vautours(Vautour_number).yspeed#,0.1
+if Vautours(Vautour_number).yspeed# < 0 then inc Vautours(Vautour_number).yspeed#,0.1
+if Vautours(Vautour_number).yspeed# < 0.1 and Vautours(Vautour_number).yspeed# > -0.1 then Vautours(Vautour_number).yspeed# = 0
+endif
+move object left Vautour_number+1701,Vautours(Vautour_number).yspeed#*Extrapolation*1.5
+position object Vautour_number+1701,object position x(Vautour_number+1701),object position y(Vautour_number+1701)-gravite#/(5/3),object position z(Vautour_number+1701)
+
+
+if KEYSTATE(16) and timer()-Vautour_timeporte >200
+do
+if KEYSTATE(16)=0 then exit
+loop
+temp = Vautours(Vautour_number).porte
+select temp
+case 0:play object Vautour_number+1701,0,50:Vautours(Vautour_number).porte=1:Vautour_timeporte = timer():endcase
+case 1:play object Vautour_number+1701,50,100:Vautours(Vautour_number).porte=0:Vautour_timeporte = timer():endcase
+endselect
+endif
+
+
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+Vautours(Vautour_number).pilote_occupe = 0
+X# = Vautours(t).x#
+Y# = Vautours(t).y#+400
+Z# = Vautours(t).z#
+endif
+
+endif
+
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem ======================================================Escompide=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+
+if Vehicule_type = 1
+print
+print "X: ",object position x(escompide_number+1801)," Y: ",object position y(escompide_number+1801)," Z: ",object position z(escompide_number+1801)
+print "Xspeed : ", escompides(escompide_number).xspeed#
+print "Yspeed : ", escompides(escompide_number).yspeed#
+inc escompides(escompide_number).anglX#,mousemoveX()/5
+rotate object escompide_number+1801,escompides(escompide_number).anglY#,escompides(escompide_number).anglX#,0
+if KEYSTATE(param(48)) then inc escompides(escompide_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec escompides(escompide_number).xspeed#,0.1
+if escompides(escompide_number).xspeed# > 2 then escompides(escompide_number).xspeed# = 2
+if escompides(escompide_number).xspeed# < -1.5 then escompides(escompide_number).xspeed# = -1.5
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if escompides(escompide_number).xspeed# > 0 then dec escompides(escompide_number).xspeed#,0.1
+if escompides(escompide_number).xspeed# < 0 then inc escompides(escompide_number).xspeed#,0.1
+if escompides(escompide_number).xspeed# > 0 then dec escompides(escompide_number).xspeed#,0.1
+if escompides(escompide_number).xspeed# < 0 then inc escompides(escompide_number).xspeed#,0.1
+if escompides(escompide_number).xspeed# < 0.1 and escompides(escompide_number).xspeed# > -0.1 then escompides(escompide_number).xspeed# = 0
+endif
+move object escompide_number+1801,escompides(escompide_number).xspeed#*Extrapolation*1.5
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+escompides(escompide_number).pilote_occupe = 0
+X# = escompides(t).x#
+Y# = escompides(t).y#+200
+Z# = escompides(t).z#
+endif
+endif
+
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem ======================================================V2CI=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+if Vehicule_type = 2
+print
+print "X: ",object position x(v2ci_number+2001)," Y: ",object position y(v2ci_number+2001)," Z: ",object position z(v2ci_number+2001)
+print "Xspeed : ", v2cis(v2ci_number).xspeed#
+print "Yspeed : ", v2cis(v2ci_number).yspeed#
+
+inc v2cis(v2ci_number).anglX#,mousemoveX()/5
+inc v2cis(v2ci_number).anglY#,mousemoveY()/5
+rotate object v2ci_number+2001,v2cis(v2ci_number).anglY#,v2cis(v2ci_number).anglX#,0
+if KEYSTATE(param(48)) then inc v2cis(v2ci_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec v2cis(v2ci_number).xspeed#,0.1
+if v2cis(v2ci_number).xspeed# > 2 then v2cis(v2ci_number).xspeed# = 2
+if v2cis(v2ci_number).xspeed# < -1.5 then v2cis(v2ci_number).xspeed# = -1.5
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if v2cis(v2ci_number).xspeed# > 0 then dec v2cis(v2ci_number).xspeed#,0.1
+if v2cis(v2ci_number).xspeed# < 0 then inc v2cis(v2ci_number).xspeed#,0.1
+if v2cis(v2ci_number).xspeed# > 0 then dec v2cis(v2ci_number).xspeed#,0.1
+if v2cis(v2ci_number).xspeed# < 0 then inc v2cis(v2ci_number).xspeed#,0.1
+if v2cis(v2ci_number).xspeed# < 0.1 and v2cis(v2ci_number).xspeed# > -0.1 then v2cis(v2ci_number).xspeed# = 0
+endif
+move object v2ci_number+2001,v2cis(v2ci_number).xspeed#*Extrapolation*1.5
+if KEYSTATE(param(51)) then inc v2cis(v2ci_number).yspeed#,0.1
+if KEYSTATE(param(50)) then dec v2cis(v2ci_number).yspeed#,0.1
+if v2cis(v2ci_number).yspeed# > 1.5 then v2cis(v2ci_number).yspeed# = 1.5
+if v2cis(v2ci_number).yspeed# < -1.5 then v2cis(v2ci_number).yspeed# = -1.5
+if KEYSTATE(param(51))=0 and KEYSTATE(param(50))=0
+if v2cis(v2ci_number).yspeed# > 0 then dec v2cis(v2ci_number).yspeed#,0.1
+if v2cis(v2ci_number).yspeed# < 0 then inc v2cis(v2ci_number).yspeed#,0.1
+if v2cis(v2ci_number).yspeed# > 0 then dec v2cis(v2ci_number).yspeed#,0.1
+if v2cis(v2ci_number).yspeed# < 0 then inc v2cis(v2ci_number).yspeed#,0.1
+if v2cis(v2ci_number).yspeed# < 0.1 and v2cis(v2ci_number).yspeed# > -0.1 then v2cis(v2ci_number).yspeed# = 0
+endif
+move object left v2ci_number+2001,v2cis(v2ci_number).yspeed#*Extrapolation*1.5
+position object v2ci_number+2001,object position x(v2ci_number+2001),object position y(v2ci_number+2001)-gravite#/(5/3),object position z(v2ci_number+2001)
+
+
+if KEYSTATE(16) and  timer()-V2CI_timeporte >200
+do
+if KEYSTATE(16)=0 then exit
+loop
+temp = v2cis(v2ci_number).porte
+select temp
+case 0:play object v2ci_number+2001,0,50:v2cis(v2ci_number).porte=1:V2CI_timeporte = timer():endcase
+case 1:play object v2ci_number+2001,50,100:v2cis(v2ci_number).porte=0:V2CI_timeporte = timer():endcase
+endselect
+endif
+
+
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+v2cis(v2ci_number).pilote_occupe = 0
+X# = v2cis(t).x#
+Y# = v2cis(t).y#+400
+Z# = v2cis(t).z#
+endif
+
+endif
+
+
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem ======================================================Moto Droide=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+if Vehicule_type = 3
+print
+print "X: ",object position x(motoD_number+2101)," Y: ",object position y(motoD_number+2101)," Z: ",object position z(motoD_number+2101)
+print "Xspeed : ", motoDs(motoD_number).xspeed#
+inc motoDs(motoD_number).anglX#,mousemoveX()/5
+rotate object motoD_number+2101,motoDs(motoD_number).anglY#,motoDs(motoD_number).anglX#,0
+if KEYSTATE(param(48)) then inc motoDs(motoD_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec motoDs(motoD_number).xspeed#,0.1
+if motoDs(motoD_number).xspeed# > 2 then motoDs(motoD_number).xspeed# = 2
+if motoDs(motoD_number).xspeed# < -1.5 then motoDs(motoD_number).xspeed# = -1.5
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if motoDs(motoD_number).xspeed# > 0 then dec motoDs(motoD_number).xspeed#,0.1
+if motoDs(motoD_number).xspeed# < 0 then inc motoDs(motoD_number).xspeed#,0.1
+if motoDs(motoD_number).xspeed# > 0 then dec motoDs(motoD_number).xspeed#,0.1
+if motoDs(motoD_number).xspeed# < 0 then inc motoDs(motoD_number).xspeed#,0.1
+if motoDs(motoD_number).xspeed# < 0.1 and motoDs(motoD_number).xspeed# > -0.1 then motoDs(motoD_number).xspeed# = 0
+endif
+move object motoD_number+2101,motoDs(motoD_number).xspeed#*Extrapolation*2.5
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+motoDs(motoD_number).pilote_occupe = 0
+X# = motoDs(t).x#
+Y# = motoDs(t).y#+200
+Z# = motoDs(t).z#
+endif
+endif
+
+
+
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem ======================================================Char Coléoptère=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+if Vehicule_type = 4
+print
+print "X: ",object position x(coleoptere_number+2201)," Y: ",object position y(coleoptere_number+2201)," Z: ",object position z(coleoptere_number+2201)
+print "Xspeed : ", coleopteres(coleoptere_number).xspeed#
+inc coleopteres(coleoptere_number).anglX#,KEYSTATE(param(50))/2.5
+dec coleopteres(coleoptere_number).anglX#,KEYSTATE(param(51))/2.5
+inc Veicle_vamXangle#,mousemoveY()/5
+rotate object coleoptere_number+2201,coleopteres(coleoptere_number).anglY#,coleopteres(coleoptere_number).anglX#,0
+if KEYSTATE(param(48)) then inc coleopteres(coleoptere_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec coleopteres(coleoptere_number).xspeed#,0.1
+if coleopteres(coleoptere_number).xspeed# > 0.5 then coleopteres(coleoptere_number).xspeed# = 0.5
+if coleopteres(coleoptere_number).xspeed# < -.25 then coleopteres(coleoptere_number).xspeed# = -0.25
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if coleopteres(coleoptere_number).xspeed# > 0 then dec coleopteres(coleoptere_number).xspeed#,0.1
+if coleopteres(coleoptere_number).xspeed# < 0 then inc coleopteres(coleoptere_number).xspeed#,0.1
+if coleopteres(coleoptere_number).xspeed# > 0 then dec coleopteres(coleoptere_number).xspeed#,0.1
+if coleopteres(coleoptere_number).xspeed# < 0 then inc coleopteres(coleoptere_number).xspeed#,0.1
+if coleopteres(coleoptere_number).xspeed# < 0.1 and coleopteres(coleoptere_number).xspeed# > -0.1 then coleopteres(coleoptere_number).xspeed# = 0
+endif
+move object coleoptere_number+2201,coleopteres(coleoptere_number).xspeed#*Extrapolation*5.0
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+coleopteres(coleoptere_number).pilote_occupe = 0
+X# = coleopteres(t).x#
+Y# = coleopteres(t).y#+200
+Z# = coleopteres(t).z#
+position object 3,x#,y#,z#
+position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object game_arme_coress(arme),object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   x2# = object position x(3)
+   y2# = object position y(3)
+   z2# = object position z(3)
+   x3# = object position x(2)
+   y3# = object position y(2)
+   z3# = object position z(2)
+   x4# = object position x(4)
+   y4# = object position y(4)
+   z4# = object position z(4)
+   oldx# = object position x(3)
+   oldy# = object position y(3)
+   oldz# = object position z(3)
+   oldx2# = object position x(2)
+   oldy2# = object position y(2)
+   oldz2# = object position z(2)
+   oldx3# = object position x(4)
+   oldy3# = object position y(4)
+   oldz3# = object position z(4)
+endif
+
+
+Coleo_OldYanglsup# = Coleo_Yanglsup#
+inc Coleo_Yanglsup#,mousemovex()/2
+if Coleo_OldYanglsup# > Coleo_Yanglsup# or Coleo_OldYanglsup# < Coleo_Yanglsup# then Coleo_Yanglsup# = curvevalue(Coleo_Yanglsup#,Coleo_OldYanglsup#,0.7)
+
+endif
+
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem ======================================================Char Faucon=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+if Vehicule_type = 5
+print
+print "X: ",object position x(Faucon_number+2401)," Y: ",object position y(FAucon_number+2401)," Z: ",object position z(FAucon_number+2401)
+print "Xspeed : ", FAucons(FAucon_number).xspeed#
+inc faucons(faucon_number).anglX#,KEYSTATE(param(50))/2.5
+dec faucons(faucon_number).anglX#,KEYSTATE(param(51))/2.5
+inc Veicle_vamXangle#,mousemoveY()/5
+rotate object faucon_number+2401,faucons(faucon_number).anglY#,faucons(faucon_number).anglX#,0
+if KEYSTATE(param(48)) then inc faucons(faucon_number).xspeed#,0.1
+if KEYSTATE(param(49)) then dec faucons(faucon_number).xspeed#,0.1
+if faucons(faucon_number).xspeed# > 0.5 then faucons(faucon_number).xspeed# = 0.5
+if faucons(faucon_number).xspeed# < -.25 then faucons(faucon_number).xspeed# = -0.25
+if KEYSTATE(param(48))=0 and KEYSTATE(param(49))=0
+if faucons(faucon_number).xspeed# > 0 then dec faucons(faucon_number).xspeed#,0.1
+if faucons(faucon_number).xspeed# < 0 then inc faucons(faucon_number).xspeed#,0.1
+if faucons(faucon_number).xspeed# > 0 then dec faucons(faucon_number).xspeed#,0.1
+if faucons(faucon_number).xspeed# < 0 then inc faucons(faucon_number).xspeed#,0.1
+if faucons(faucon_number).xspeed# < 0.1 and faucons(faucon_number).xspeed# > -0.1 then faucons(faucon_number).xspeed# = 0
+endif
+move object faucon_number+2401,faucons(faucon_number).xspeed#*Extrapolation*5.0
+if keystate(18)
+do
+if keystate(18) =  0 then exit
+loop
+exclude object off game_arme_coress(arme)
+show sprite 15
+gameplay_Type = 1
+faucons(faucon_number).pilote_occupe = 0
+X# = faucons(t).x#
+Y# = faucons(t).y#+200
+Z# = faucons(t).z#
+position object 3,x#,y#,z#
+position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object game_arme_coress(arme),object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+   x2# = object position x(3)
+   y2# = object position y(3)
+   z2# = object position z(3)
+   x3# = object position x(2)
+   y3# = object position y(2)
+   z3# = object position z(2)
+   x4# = object position x(4)
+   y4# = object position y(4)
+   z4# = object position z(4)
+   oldx# = object position x(3)
+   oldy# = object position y(3)
+   oldz# = object position z(3)
+   oldx2# = object position x(2)
+   oldy2# = object position y(2)
+   oldz2# = object position z(2)
+   oldx3# = object position x(4)
+   oldy3# = object position y(4)
+   oldz3# = object position z(4)
+endif
+
+
+faucon_OldYanglsup# = faucon_Yanglsup#
+inc faucon_Yanglsup#,mousemovex()/2
+if faucon_OldYanglsup# > faucon_Yanglsup# or faucon_OldYanglsup# < faucon_Yanglsup# then faucon_Yanglsup# = curvevalue(faucon_Yanglsup#,faucon_OldYanglsup#,0.7)
+
+endif
+
+rem ============================================================================================================================
+endif
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+rem =============================================Routines hors gameplay=====================================================================
+rem *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+if nb_vautour > 0
+for t = 0 to nb_vautour-1
+if Vautours(t).pilote_occupe = 0 then position object t+1701,object position x(t+1701),object position y(t+1701)-gravite#*2,object position z(t+1701)
+      Vautours(t).x# =object position x(t+1701)
+      Vautours(t).y# =object position y(t+1701)
+      Vautours(t).z# =object position z(t+1701)
+Vautours(t).collide = sc_SphereSlide(0,Vautours(t).oldx#,Vautours(t).oldy#,Vautours(t).oldz#,Vautours(t).x#,Vautours(t).y#,Vautours(t).z#,object size(t+1701)+10,t+1701)
+if Vautours(t).collide > 0
+      Vautours(t).x# = sc_getCollisionSlideX()
+      Vautours(t).y# = sc_getCollisionslideY()
+      Vautours(t).z# = sc_getCollisionSlideZ()
+      position object t+1701,Vautours(t).x#,Vautours(t).y#,Vautours(t).z#
+endif
+Sc_setupobject 1701+t,1,0
+if t=Vautour_number and Vehicule_type = 0 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(Vautour_number+1701),object position y(Vautour_number+1701),object position z(Vautour_number+1701),object angle y(Vautour_number+1701),1000,500,3,0
+next t
+endif
+
+if nb_escompide > 0
+for t = 0 to nb_escompide-1
+if escompides(t).collide2 > 0 then  position object t+1801,object position x(t+1801),object position y(t+1801)-gravite#*2,object position z(t+1801)
+if escompides(t).collide2 = 0 and escompides(t).collide = 0 then position object t+1801,object position x(t+1801),object position y(t+1801)-gravite#*4,object position z(t+1801)
+      escompides(t).x# =object position x(t+1801)
+      escompides(t).y# =object position y(t+1801)
+      escompides(t).z# =object position z(t+1801)
+escompides(t).collide2 = sc_SphereSlide(0,escompides(t).oldx#,escompides(t).oldy#-10,escompides(t).oldz#,escompides(t).x#,escompides(t).y#-10,escompides(t).z#,object size(t+1801)-20,t+1801)
+escompides(t).collide = sc_SphereSlide(0,escompides(t).oldx#,escompides(t).oldy#,escompides(t).oldz#,escompides(t).x#,escompides(t).y#,escompides(t).z#,object size(t+1801)+10,t+1801)
+if escompides(t).collide > 0
+      escompides(t).x# = sc_getCollisionSlideX()
+      escompides(t).y# = sc_getCollisionslideY()
+      escompides(t).z# = sc_getCollisionSlideZ()
+      position object t+1801,escompides(t).x#,escompides(t).y#,escompides(t).z#
+endif
+SC_updateObject t+1801
+if t=escompide_number and Vehicule_type = 1 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(escompide_number+1801),object position y(escompide_number+1801),object position z(escompide_number+1801),object angle y(escompide_number+1801),1000,500,3,0
+next t
+endif
+
+
+if nb_v2ci >0
+for t = 0 to nb_v2ci-1
+if v2cis(t).pilote_occupe = 0 then position object t+2001,object position x(t+2001),object position y(t+2001)-gravite#*2,object position z(t+2001)
+      v2cis(t).x# =object position x(t+2001)
+      v2cis(t).y# =object position y(t+2001)
+      v2cis(t).z# =object position z(t+2001)
+v2cis(t).collide = sc_SphereSlide(0,v2cis(t).oldx#,v2cis(t).oldy#,v2cis(t).oldz#,v2cis(t).x#,v2cis(t).y#,v2cis(t).z#,object size(t+2001)+10,t+2001)
+if v2cis(t).collide > 0
+      v2cis(t).x# = sc_getCollisionSlideX()
+      v2cis(t).y# = sc_getCollisionslideY()
+      v2cis(t).z# = sc_getCollisionSlideZ()
+      position object t+2001,v2cis(t).x#,v2cis(t).y#,v2cis(t).z#
+endif
+Sc_setupobject 2001+t,1,0
+if t=v2ci_number and Vehicule_type = 2 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(v2ci_number+2001),object position y(v2ci_number+2001),object position z(v2ci_number+2001),object angle y(v2ci_number+2001),1500,800,3,0
+next t
+endif
+
+if nb_motoD > 0
+for t = 0 to nb_motoD-1
+if motoDs(t).collide2 > 0 then  position object t+2101,object position x(t+2101),object position y(t+2101)-gravite#*2,object position z(t+2101)
+if motoDs(t).collide2 = 0 and motoDs(t).collide = 0 then position object t+2101,object position x(t+2101),object position y(t+2101)-gravite#*4,object position z(t+2101)
+      motoDs(t).x# =object position x(t+2101)
+      motoDs(t).y# =object position y(t+2101)
+      motoDs(t).z# =object position z(t+2101)
+motoDs(t).collide2 = sc_SphereSlide(0,motoDs(t).oldx#,motoDs(t).oldy#-10,motoDs(t).oldz#,motoDs(t).x#,motoDs(t).y#-10,motoDs(t).z#,object size(t+2101)-10,t+2101)
+motoDs(t).collide = sc_SphereSlide(0,motoDs(t).oldx#,motoDs(t).oldy#,motoDs(t).oldz#,motoDs(t).x#,motoDs(t).y#,motoDs(t).z#,object size(t+2101)+10,t+2101)
+if motoDs(t).collide > 0
+      motoDs(t).x# = sc_getCollisionSlideX()
+      motoDs(t).y# = sc_getCollisionslideY()
+      motoDs(t).z# = sc_getCollisionSlideZ()
+      position object t+2101,motoDs(t).x#,motoDs(t).y#,motoDs(t).z#
+endif
+SC_updateObject t+2101
+if t=motoD_number and Vehicule_type = 3 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(motoD_number+2101),object position y(motoD_number+2101),object position z(motoD_number+2101),object angle y(motoD_number+2101),100,150,3,0
+next t
+endif
+
+if nb_coleoptere > 0
+for t = 0 to nb_coleoptere-1
+      coleopteres(t).oldx# = object position x(t+2201)
+      coleopteres(t).oldy# = object position y(t+2201)
+      coleopteres(t).oldz# = object position z(t+2201)
+position object t+2201,object position x(t+2201),object position y(t+2201),object position z(t+2201)
+position object t+2301,object position x(t+2201),object position y(t+2201),object position z(t+2201)
+rotate object t+2301,coleopteres(coleoptere_number).anglY#,coleopteres(coleoptere_number).anglX#+Coleo_Yanglsup#,0
+      coleopteres(t).x# =object position x(t+2201)
+      coleopteres(t).y# =object position y(t+2201)
+      coleopteres(t).z# =object position z(t+2201)
+coleopteres(t).collide = sc_SphereSlide(0,coleopteres(t).oldx#,coleopteres(t).oldy#+80,coleopteres(t).oldz#,coleopteres(t).x#,coleopteres(t).y#+80,coleopteres(t).z#,200,t+2301)
+if coleopteres(t).collide > 0
+      coleopteres(t).x# = sc_getCollisionSlideX()
+      coleopteres(t).y# = sc_getCollisionslideY()
+      coleopteres(t).z# = sc_getCollisionSlideZ()
+      position object t+2201,coleopteres(t).x#,coleopteres(t).y#,coleopteres(t).z#
+endif
+SC_updateObject t+2201
+SC_updateObject t+2301
+if t=coleoptere_number and Vehicule_type = 4 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(coleoptere_number+2201),object position y(coleoptere_number+2201),object position z(coleoptere_number+2201),coleopteres(coleoptere_number).anglX#+Coleo_Yanglsup#,1500,Veicle_vamXangle#,3,0
+
+next t
+endif
+
+
+if nb_faucon > 0
+for t = 0 to nb_faucon-1
+      faucons(t).oldx# = object position x(t+2401)
+      faucons(t).oldy# = object position y(t+2401)
+      faucons(t).oldz# = object position z(t+2401)
+position object t+2401,object position x(t+2401),object position y(t+2401),object position z(t+2401)
+position object t+2501,newxvalue(object position x(t+2401),faucons(faucon_number).anglX#,-380),object position y(t+2401),newzvalue(object position z(t+2401),faucons(faucon_number).anglX#,-380)
+rotate object t+2501,faucons(faucon_number).anglY#,faucons(faucon_number).anglX#+faucon_Yanglsup#,0
+      faucons(t).x# =object position x(t+2401)
+      faucons(t).y# =object position y(t+2401)
+      faucons(t).z# =object position z(t+2401)
+faucons(t).collide = sc_SphereSlide(0,faucons(t).oldx#,faucons(t).oldy#+80,faucons(t).oldz#,faucons(t).x#,faucons(t).y#+80,faucons(t).z#,200,t+2501)
+if faucons(t).collide > 0
+      faucons(t).x# = sc_getCollisionSlideX()
+      faucons(t).y# = sc_getCollisionslideY()
+      faucons(t).z# = sc_getCollisionSlideZ()
+      position object t+2401,faucons(t).x#,faucons(t).y#,faucons(t).z#
+endif
+SC_updateObject t+2401
+SC_updateObject t+2501
+if t=faucon_number and Vehicule_type = 5 and gameplay_Type = 3 then  SET CAMERA TO FOLLOW object position x(faucon_number+2401),object position y(faucon_number+2401),object position z(faucon_number+2401),faucons(faucon_number).anglX#+faucon_Yanglsup#,1500,Veicle_vamXangle#,3,0
+
+next t
+endif
+
+   sc_updateObject 1
+   sc_updateObject 2
+   sc_updateObject 3
+   sc_updateObject 4
+   sc_updateObject 5
+
+return

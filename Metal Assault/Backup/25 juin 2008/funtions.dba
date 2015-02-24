@@ -1,0 +1,515 @@
+
+
+Rem *** Include File: funtions.dba ***
+Rem Created: 03/01/2008 09:15:58
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+function distance(a,b)
+break
+   distance#=sqrt((object position x(b)-object position x(a))^2+(object position y(b)-object position y(a))^2+(object position z(b)-object position z(a))^2)
+endfunction distance#
+
+function boutton(droite,gauche,haut,bas)
+if mouseX() > droite and mouseX() < gauche and mousey() > haut and mouseY() < bas and mouseclick() = 1
+result = 1
+else
+result = 0
+endif
+endfunction result
+
+function pseudo_input(pos_x AS INTEGER, pos_y AS INTEGER, txt$ AS STRING, max_longueur_ligne AS INTEGER)
+   ` si on ne veux pas de son, mettre à 0 la variable : 'jouer_le_son'
+   jouer_le_son=0 : son_numero=1023
+   ` si on ne veux pas afficher la frappe en cours mettre à 1 la variable : 'cache_caracteres'  (des * seront affichées à la place)
+   cache_caracteres=0
+
+   time=TIMER()
+   if max_longueur_ligne>0 then max_longueur_ligne=max_longueur_ligne&&255 else max_longueur_ligne=255
+   pseu_old_saisie_clavier$=pseu_saisie_clavier$
+   pseu_saisie_clavier$=INKEY$()
+   if pseu_old_saisie_clavier$<>pseu_saisie_clavier$ then pseu_old_saisie_clavier$=""
+   ` si ce n'est pas un caractère alphabétique
+   if pseu_saisie_clavier$<" "
+      pseu_saisie_clavier$="" : pseu_old_saisie_clavier$=""
+      ` alors on teste les touches supp, droite, gauche, etc .
+      pseu_old_azerty=pseu_azerty
+      pseu_azerty=SCANCODE()
+      if pseu_old_azerty<>pseu_azerty then pseu_old_azerty=0
+      selection_scancode=0
+      if pseu_azerty>pseu_old_azerty
+         selection_scancode=pseu_azerty
+         ` délai avant répétition
+         pseu_newtime=time+500
+      endif
+      if time >= pseu_newtime
+         selection_scancode=pseu_azerty
+         ` délai des répétitions
+         pseu_newtime=time+30
+      endif
+   else
+      ` sinon on fabrique la chaine de caractère alphabétique
+      if pseu_longueur_ligne<max_longueur_ligne
+         if pseu_saisie_clavier$>pseu_old_saisie_clavier$
+            pseu_ligne$=pseu_a_gauche_du_curseur$+pseu_saisie_clavier$+pseu_a_droite_du_curseur$
+            INC pseu_cursor_position
+            selection_scancode=1
+            ` délai avant répétition
+            pseu_newtime=time+500
+            play_son=jouer_le_son
+         endif
+         if time >= pseu_newtime
+            pseu_ligne$=pseu_a_gauche_du_curseur$+pseu_saisie_clavier$+pseu_a_droite_du_curseur$
+            INC pseu_cursor_position
+            selection_scancode=1
+            ` délai des répétitions
+            pseu_newtime=time+30
+            play_son=jouer_le_son
+         endif
+      endif
+   endif
+
+   ` mise à jour des chaines de caratère
+   pseu_longueur_ligne=LEN(pseu_ligne$)
+   pseu_a_gauche_du_curseur$=LEFT$(pseu_ligne$,pseu_cursor_position-1)
+   pseu_a_droite_du_curseur$=RIGHT$(pseu_ligne$,pseu_longueur_ligne-pseu_cursor_position+1)
+   screen_cursor=TEXT WIDTH(txt$+pseu_a_gauche_du_curseur$)
+
+   ` on bloque le clignotement du curseur pendant l'appui/répétion d'une touche
+   if selection_scancode then pseu_curseur_visible=TIMER()
+
+   select selection_scancode
+      ` backspace
+      case 14
+         if pseu_longueur_ligne>0
+            DEC pseu_cursor_position
+            if pseu_cursor_position<1 then pseu_cursor_position=1 else play_son=jouer_le_son
+            pseu_ligne$=LEFT$(pseu_a_gauche_du_curseur$,pseu_cursor_position-1)+pseu_a_droite_du_curseur$
+            fr=pseu_cursor_position-1
+         endif
+      endcase
+
+      ` supprime
+      case 211
+         if LEN(pseu_a_droite_du_curseur$)>0
+            play_son=jouer_le_son
+            pseu_ligne$=pseu_a_gauche_du_curseur$+RIGHT$(pseu_a_droite_du_curseur$,pseu_longueur_ligne-pseu_cursor_position)
+         endif
+      endcase
+
+      ` return
+      case 28
+         pseu_ligne_final$=pseu_ligne$
+         pseu_ligne$=""
+         pseu_a_gauche_du_curseur$=""
+         pseu_a_droite_du_curseur$=""
+         pseu_saisie_clavier$=""
+         pseu_old_saisie_clavier$=""
+         pseu_cursor_position=1
+      endcase
+
+      ` enter
+      case 156
+         pseu_ligne_final$=pseu_ligne$
+         pseu_ligne$=""
+         pseu_a_gauche_du_curseur$=""
+         pseu_a_droite_du_curseur$=""
+         pseu_saisie_clavier$=""
+         pseu_old_saisie_clavier$=""
+         pseu_cursor_position=1
+      endcase
+
+      ` gauche
+      case 203
+         DEC pseu_cursor_position
+         if pseu_cursor_position<1 then pseu_cursor_position=1 else play_son=jouer_le_son
+      endcase
+
+      ` droite
+      case 205
+         if pseu_cursor_position<pseu_longueur_ligne+1 then INC pseu_cursor_position : play_son=jouer_le_son
+      endcase
+
+      ` end
+      case 207
+         pseu_cursor_position=pseu_longueur_ligne+1
+      endcase
+
+      ` home
+      case 199
+         pseu_cursor_position=1
+      endcase
+
+   endselect
+
+   ` affichage de la ligne en cours de frappe
+   if cache_caracteres
+      for i=1 TO pseu_longueur_ligne
+      tmp$=tmp$+"*"
+      next i
+      ` affiche des *
+      screen_cursor=TEXT WIDTH(txt$+LEFT$(tmp$,pseu_cursor_position-1))
+      TEXT pos_x,pos_y,txt$+tmp$
+   else
+      ` sinon affiche le texte en clair
+      TEXT pos_x,pos_y,txt$+pseu_ligne$
+   endif
+
+
+   `  et d'un curseur
+   if TIMER()<=pseu_curseur_visible+500
+      ` vertical clignotant
+      TEXT pos_x+screen_cursor-(TEXT WIDTH("|")/2),pos_y,"|"
+
+      ` ou horizontal clignotant
+      ` TEXT pos_x+screen_cursor,pos_y,"_"
+   else
+      if TIMER()>pseu_curseur_visible+1000 then pseu_curseur_visible=time
+   endif
+
+   ` jouer un son
+   if play_son
+      ` joue un son de machine à écrire, par exemple
+      if SOUND EXIST(son_numero) then STOP SOUND son_numero : PLAY SOUND son_numero
+   endif
+
+endfunction pseu_ligne_final$
+
+function boutton2(gauche,haut,droite,bas)
+if mouseX() < droite and gauche < mouseX() and mousey() > haut and mouseY() < bas and mouseclick() = 1
+result = 1
+else
+result = 0
+endif
+endfunction result
+
+function Survol(gauche,haut,droite,bas)
+if mouseX() < droite and gauche < mouseX() and mousey() > haut and mouseY() < bas
+result = 1
+else
+result = 0
+endif
+endfunction result
+
+function texte(i,tx$,f$,t,t$)
+ if t>85 then  mt#=t/85.0:t=85
+ load bitmap t$,1 : create bitmap 2,1024,t
+ set text font f$ : set text size t : set text opaque
+ ink RGB(0,0,0),RGB(20,20,20)
+ for a=1 to 20:tx$=tx$ +"                 ":next
+ print tx$ : get image i,0,0,1024,t,1
+ for a=0 to 1024/t : copy bitmap 1,0,0,bitmap width(1),bitmap height(1),2,a*t,0,a*t+t,t : next
+ paste image i,0,0,1 : get image i,0,0,1024,t,1 : delete bitmap 1
+ make memblock from image 1,i : px=memblock dword(1,0):py=memblock dword(1,4)
+ write memblock dword 1,8,32 : c=memblock dword(1,12)
+ for x=0 to px-1
+  for y=0 to py-1
+  pos=(x+y*px)*4
+  if c=memblock dword(1,pos+12)
+   write memblock dword 1,pos+12,0
+  else
+   if x1=0 then x1=x else x2=x
+   if y1=0 then y1=y
+  endif
+  next y
+ next x
+ make image from memblock i,1
+ set current bitmap 2
+ cls : paste image i,0,0,1
+ if mt#>1
+  create bitmap 1,(x2-x1)*mt#,85*mt#
+  copy bitmap 2,x1,0,x2,t,1,0,0,(x2-x1)*mt#,85*mt#
+  get image i,0,0,(x2-x1)*mt#,85*mt#,1 : delete bitmap 1
+ else
+  get image i,x1,0,x2,t,1
+ endif
+ delete bitmap 2 : set current bitmap 0
+endfunction
+
+function New_txt(txt_nb,string$,txt_size,red,green,blue,X,Y,img_nb,sprite_nb)
+if txt(txt_nb).temp = 0
+txt(txt_nb).string$ = string$
+txt(txt_nb).size = txt_size
+txt(txt_nb).red = red
+txt(txt_nb).green =green
+txt(txt_nb).blue = blue
+txt(txt_nb).X = X
+txt(txt_nb).Y = Y
+txt(txt_nb).img_nb = img_nb
+txt(txt_nb).sprite_nb = sprite_nb
+else
+txt(txt_nb).temp = 0
+set sprite alpha txt(txt_nb).sprite_nb,0
+txt(txt_nb).string$ = string$
+txt(txt_nb).size = txt_size
+txt(txt_nb).red = red
+txt(txt_nb).green =green
+txt(txt_nb).blue = blue
+txt(txt_nb).X = X
+txt(txt_nb).Y = Y
+txt(txt_nb).img_nb = img_nb
+txt(txt_nb).sprite_nb = sprite_nb
+endif
+set text size txt_size
+set text to normal
+ink rgb(red,green,blue),1
+set cursor 0,0
+create bitmap 1,text width(string$),text height(string$)+1
+print string$
+get image img_nb,0,3,text width(string$),text height(string$)
+delete bitmap 1
+txt(txt_nb).temp = 255
+sprite txt(txt_nb).sprite_nb,txt(txt_nb).X,txt(txt_nb).Y,txt(txt_nb).img_nb
+show sprite txt(txt_nb).sprite_nb
+set sprite alpha sprite_nb,txt(txt_nb).temp
+offset sprite sprite_nb,sprite width(sprite_nb)/2,sprite height(sprite_nb)/2
+ink rgb(255,255,255),1
+endfunction
+
+
+
+function Update_txt(txt_nb,speed)
+txt(txt_nb).lastspeed = speed
+if txt(txt_nb).temp > speed then dec txt(txt_nb).temp,speed : else : txt(txt_nb).temp = 0 : hide sprite txt(txt_nb).sprite_nb
+set sprite alpha txt(txt_nb).sprite_nb,txt(txt_nb).temp
+sprite txt(txt_nb).sprite_nb,txt(txt_nb).X,txt(txt_nb).Y,txt(txt_nb).img_nb
+endfunction
+
+function txt_exist(txt_nb)
+if txt(txt_nb).temp > txt(txt_nb).lastspeed then result =1 else result = 0
+endfunction result
+
+
+function reset_txt(txt_nb,valeur)
+if valeur = 0 then valeur = 255
+txt(txt_nb).temp = valeur
+show sprite txt(txt_nb).sprite_nb
+endfunction
+
+function update_fx(alpha,bloom_on,spec,temp) `fx
+REM Prepare
+set camera to image 0,100000,1024,1024
+sprite 100000,0,0,100000
+set sprite 100000,0,1
+size sprite 100000,screen width(),screen height()
+REM Motion blur
+set sprite alpha 100000,alpha
+REM Soft
+if bloom_on=1
+if sprite exist(100001)=0
+sprite 100001,screen width()/2,screen height()/2,100000
+set sprite 100001,0,1
+offset sprite 100001,screen width()/2,screen height()/2
+set sprite alpha 100001,35
+clone sprite 100001,100002:clone sprite 100001,100003
+clone sprite 100001,100004:clone sprite 100001,100005
+size sprite 100001,screen width()+10,screen height()+10
+size sprite 100002,screen width()+5,screen height()
+size sprite 100003,screen width()+10,screen height()
+size sprite 100004,screen width(),screen height()+5
+size sprite 100005,screen width(),screen height()+10
+endif
+set ambient light 25
+show sprite 100001:show sprite 100002
+show sprite 100003:show sprite 100004
+show sprite 100005
+else
+if sprite exist(100001)=1
+hide sprite 100001:hide sprite 100002
+hide sprite 100003:hide sprite 100004
+hide sprite 100005
+endif
+set ambient light 20
+endif
+REM Misc fx
+REM Quake
+if spec=1
+paste sprite 100000,0+rnd(2)-rnd(2),0+rnd(2)-rnd(2)
+endif
+REM Unnormal
+if spec=2
+if sprite exist(100006)=0
+sprite 100006,screen width()/2,screen height()/2,100000
+offset sprite 100006,screen width()/2,screen height()/2
+set sprite 100006,0,1
+size sprite 100006,screen width(),screen height()
+set sprite alpha 100006,50
+clone sprite 100006,100007:clone sprite 100006,100008
+clone sprite 100006,100009
+endif
+rotate sprite 100006,wrapvalue(temp)
+rotate sprite 100007,360-wrapvalue(temp)
+rotate sprite 100008,wrapvalue(180+temp)
+rotate sprite 100009,wrapvalue(180-temp)
+show sprite 100006:show sprite 100007
+show sprite 100008:show sprite 100009
+else
+if sprite exist(100006)=1
+hide sprite 100006:hide sprite 100007
+hide sprite 100008:hide sprite 100009
+endif
+endif
+REM Lines
+if spec=3
+for t=1 to 100
+sprite 100010+(t-1),0,(t-1)*(screen height()/100),100000
+size sprite 100010+(t-1),screen width(),screen height()/100
+set sprite alpha 100010+(t-1),10
+show sprite 100010+(t-1)
+next t
+else
+if sprite exist(100010)=1
+for t=1 to 100
+hide sprite 100010+(t-1)
+next t
+endif
+endif
+endfunction
+
+function distance2D(X1,Y1,X2,Y2)
+result = sqrt((X2-X1)^2+(Y2-Y1)^2)
+endfunction result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

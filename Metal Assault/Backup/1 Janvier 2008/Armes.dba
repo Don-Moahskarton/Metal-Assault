@@ -1,0 +1,272 @@
+Rem *** Include File: Armes.dba ***
+Rem Created: 31/12/2007 17:42:44
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+armes:
+
+if mouseclick() =1 and time+1000<timer()
+Game_tir_possible =1
+else
+Game_tir_possible =0
+endif
+if mouseclick() =1 and time+100<timer()
+Game_minigun_tir_possible =1
+else
+Game_minigun_tir_possible =0
+endif
+if object playing(11) = 0 then loop object 11,0,20
+
+temp = 0
+for t = 1100 to 1159
+inc temp
+break
+if Game_roket_life(temp) > 0
+move object t+1,((FPS*-1)+400)/3.5
+Game_roket_life(temp) = Game_roket_life(temp)-1
+endif
+next t
+if arme  = 1 and mouseclick() =1 then inc game_Lr_chargement
+
+
+
+rem on enlève les particules si elles ne sevent plus a rien
+if time+250<timer()
+if particles exist(p) = 1 then set particle emissions p,0 :Game_particules_a_stoper = 0
+endif
+
+
+rem réticule
+sprite 15,param(35)/2-25,param(36)/2-25,15
+
+rem changement d'arme
+oldmousZ# = mousZ#
+mousZ# = mousZ# + mousemoveZ()
+if oldmousZ#-mousZ# = 0
+else
+   if oldmousZ#-mousZ# > 0
+   dec arme
+   endif
+   if oldmousZ#-mousZ# < 0
+   inc arme
+   endif
+   game_arme_a_charger = 1
+endif
+if arme > 2 then arme = 2
+if arme < 0 then arme = 0
+
+
+
+
+if game_arme_a_charger = 1
+if arme = 1
+delete object 11
+set dir CheminMA$+"\Models\"
+load object "Bazook.X",11
+disable object zdepth 11
+loop object 11,0,20
+set object speed 11,25
+delete image 15
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "REticule_bazook.tga",15,1
+delete sound 2
+set dir CheminMA$+"\Sounds"
+load sound "Bazook_tir.wav",2
+game_arme_a_charger = 0
+endif
+
+if arme = 0
+delete object 11
+set dir CheminMA$+"\Models\"
+load object "Snipe2.X",11
+disable object zdepth 11
+loop object 11,0,20
+set object speed 11,40
+delete image 15
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "REticule_sinpe.tga",15,1
+delete sound 2
+set dir CheminMA$+"\Sounds"
+load sound "Snipe_tir.wav",2
+game_arme_a_charger = 0
+endif
+
+if arme = 2
+delete object 11
+set dir CheminMA$+"\Models\"
+load object "minigun.X",11
+disable object zdepth 11
+loop object 11,0,30
+set object speed 11,60
+delete image 15
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "REticule_minigun.tga",15,1
+delete sound 2
+set dir CheminMA$+"\Sounds"
+load sound "minigun_tir.WAV",2
+game_arme_a_charger = 0
+endif
+
+endif
+
+select arme
+
+Rem ================================================= Fusil de précision ====================================================
+rem =========================================================================================================================
+
+   case 0
+
+   rem tir
+   if mouseclick() = 1 and Game_tir_possible =1
+   time = timer()
+   stop object 11
+   Rand = rnd(1)
+   select rand
+   case 1 : play object 11,25,30 : endcase
+   case 0 : play object 11,45,50 : endcase
+   endselect
+   play sound 2
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   position object 13,Xtemp#,Ytemp#,Ztemp# :  point object 13,tx#,ty#,tz#
+   position particles p,object position x(13) , object position y(13), object position z(13)
+   rotate particles p ,object angle x(13) , object angle y(13),object angle z(13)
+   set particle emissions p,100  : Game_particules_a_stoper = 1
+   if particles exist(p-1) = 1 then set particle emissions p-1,0
+   if particles exist(10) = 1 and p <> 10 then set particle emissions 10,0
+   endif
+   endif
+
+   rem zoom
+   if mouseclick() = 2 and zoom = 60 and zoom_encour = 0  and dessomee = 1
+   zoom = 59
+   zoom_encour = 1
+   sprite 14,0,0,14
+   show sprite 14
+   exclude object on 11
+   set camera fov zoom
+   endif
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 1
+   dec zoom,5
+   if zoom < 10 then zoom = 10
+   set camera fov zoom
+   endif
+   if mouseclick() = 0 and zoom < 60 and zoom_encour = 1 then zoom_encour = 0 : desoomee = 1
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 0 and desoomee = 1
+   inc zoom,30
+   if zoom > 60 then zoom = 60 : hide sprite 14 : exclude object off 11
+   if zoom = 60 then hide sprite 14 : exclude object off 11
+   set camera fov zoom
+   dessomee = 0
+   endif
+   if mouseclick() = 0 and dessomee = 0 then dessomee = 1
+
+   endcase
+
+Rem ================================================= Double Lance-roquette =================================================
+rem =========================================================================================================================
+
+   case 1
+
+   if mouseclick() =0 then game_Lr_chargementOLD = game_Lr_chargement : game_roket_dejatire = 0
+   if Game_roket_select > 1129 then Game_roket_select = 1102
+   if Game_biroket_select > 1159 then Game_biroket_select = 1132
+   if Game_roket_life(Game_roket_select-1100) < 0 then dec Game_roket_select
+   if Game_roket_life(Game_biroket_select-1100) < 0 then dec Game_biroket_select
+
+   if  game_Lr_chargement = game_Lr_chargementOLD and game_Lr_chargementOLD > 0 and time+1000<timer() and  game_roket_dejatire = 0 and  game_Lr_chargement > 30: rem  si on a le lance rokett
+   time = timer()
+   stop object 11
+   play object 11,45,50
+   play sound 2
+   exclude object off Game_biroket_select
+   loop object Game_biroket_select,0,20
+   rotate object Game_biroket_select,camera angle X(),camera angle y(),camera angle z()
+   position object Game_biroket_select,camera position X(),camera position y(),camera position z()
+   Game_roket_life(Game_biroket_select-1100) = 1000
+   inc Game_biroket_select
+   game_Lr_chargement = 0
+   game_roket_dejatire = 1
+   endif
+
+   if game_Lr_chargement = game_Lr_chargementOLD and game_Lr_chargementOLD > 0 and time+1000<timer() and  game_roket_dejatire = 0 : rem  si on a le lance rokett
+   time = timer()
+   stop object 11
+   play object 11,25,30
+   play sound 2
+   exclude object off Game_roket_select
+   rotate object Game_roket_select,camera angle X(),camera angle y(),camera angle z()
+   position object Game_roket_select,camera position X(),camera position y(),camera position z()
+   Game_roket_life(Game_roket_select-1100) = 1000
+   inc Game_roket_select
+   game_Lr_chargement = 0
+   game_roket_dejatire = 1
+   endif
+
+   endcase
+
+Rem ================================================= Minigun ===============================================================
+rem =========================================================================================================================
+
+   case 2
+   if mouseclick() = 1 and Game_minigun_tir_possible =1
+   time = timer()
+   stop object 11
+   Rand = rnd(1)
+   select rand
+   case 1 : play object 11,30,100 : endcase
+   endselect
+   play sound 2
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   position object 13,Xtemp#,Ytemp#,Ztemp# :  point object 13,tx#,ty#,tz#
+   position particles p,object position x(13) , object position y(13), object position z(13)
+   rotate particles p ,object angle x(13) , object angle y(13),object angle z(13)
+   set particle emissions p,100  : Game_particules_a_stoper = 1
+   if particles exist(p-1) = 1 then set particle emissions p-1,0
+   if particles exist(10) = 1 and p <> 10 then set particle emissions 10,0
+   endif
+   endif
+   endcase
+
+
+
+
+
+
+
+
+
+endselect
+return

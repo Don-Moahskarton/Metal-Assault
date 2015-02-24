@@ -1,0 +1,142 @@
+Rem *** Include File: UI.dba ***
+Rem Created: 26/05/2008 18:21:44
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Game_UI:
+if armure_type > 3 then set image colorkey 0,0,0 : paste image 23,0,0,1
+rem l'affichage du lazer si besoin il y a
+if Game_lazer_visible = 1
+   if AK_74_Lazer>0
+   sprite 20,param(35)/2-13,param(36)/2-13,AK_74_Lazer
+   endif
+   if Famas_Lazer>0
+   sprite 20,param(35)/2-13,param(36)/2-13,Famas_Lazer
+   endif
+else
+   if Famas_Lazer>0
+   sprite 20,100000,1000000,Famas_Lazer
+   endif
+   if AK_74_Lazer>0
+   sprite 20,100000,1000000,AK_74_Lazer
+   endif
+endif
+rem la console\le chat
+gosub console
+rem le sys de texte principal...
+gosub Sytext
+rem le petit indicateur de score
+if armure_type > 2
+set text size 20
+set text to bold
+paste image 17,128,0
+set cursor 278,20
+print Mort
+set cursor 528,20
+print Frag
+endif
+set text to normal
+rem pareil au HUD du zoom
+if sprite visible(14) and game_arme_coress(arme) = 1070
+set cursor 55,32
+print vie
+endif
+set text size 12
+rem affiche le nom du persomage pointé
+if armure_type > 1
+dxScreen = object screen X(5000)
+dyScreen = object screen Y(5000)
+if (param(35)/2-300)<dxScreen and dxScreen<(param(35)/2+300) and (param(36)/2-300)<dyScreen and dyScreen<(param(36)/2+300) and object in screen(5000) = 1 then center text param(35)/2,param(36)/2+20,nombot$
+endif
+rem l'indicateur de munition
+Paste image 19,316,param(36)-61
+set cursor 322,param(36)-40
+print listarme(game_arme_coress(arme)-1000).bulets_encour
+set cursor 372,param(36)-40
+print listarme(game_arme_coress(arme)-1000).bulets_Stock
+rem l'anim de l'EC
+if Vie <> OLDvie
+delete animation 1
+if vie > 100
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100++.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie = 100
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 100 and vie => 90
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 90 and vie => 80
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 90.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 80 and vie => 70
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 80.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 70 and vie => 60
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 70.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 60 and vie => 50
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 60.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 50 and vie => 40
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 50.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 40 and vie => 30
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 40.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 30 and vie => 20
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 30.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 20 and vie => 10
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 20.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie < 10 and vie > 0
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 10.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+if vie = 0
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 0.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+endif
+
+rem réticule
+sprite 15,param(35)/2,param(36)/2,game_arme_coress(arme)
+offset sprite 15,sprite width(15)/2,sprite height(15)/2
+return

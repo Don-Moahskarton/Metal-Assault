@@ -1,0 +1,5 @@
+[COMMON]
+PathToEXE=E:\Metal Assault\Models\Human\CrashOn_05_25_12.txt
+[CEXE]
+m_dwRuntimeErrorDWORD=Internal Code:15031
+m_dwRuntimeErrorLineDWORD=1165

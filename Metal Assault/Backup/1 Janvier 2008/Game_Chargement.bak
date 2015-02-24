@@ -1,0 +1,165 @@
+Rem *** Include File: Game_Chargement.dba ***
+Rem Created: 09/12/2007 09:49:21
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+rem =========================================================================================================================
+rem ============================================== Chargement du jeu ========================================================
+rem =========================================================================================================================
+
+load_game:
+
+rem le système
+set camera range 10,50000
+set text size 24
+set text to bold
+
+rem on détruit les anciennes images...
+delete sprite 4
+delete image 4
+delete sprite 5
+delete image 5
+delete sprite 6
+delete image 7
+delete sprite 7
+delete image 8
+delete animation 1
+
+rem l'ecran de chargement
+set dir CheminMA$+"\Jpegs\Menu"
+set image colorkey 255,0,0
+load image "Chargement.jpg",4
+set image colorkey 0,0,0
+sprite 4,0,0,4
+size sprite 4,param(35),param(36)
+wait 1
+
+rem intialisation du zoom
+zoom = 60
+dessomee = 1
+make object cube 1,100
+rem initialisation du moteur de physique
+global radius# as double float : radius# = 20.0 : rem la ditance minimale entre le perso et un mur...
+rem a laisser vide pour éviter les bugs de la gravitée (c'est la faute de DBP)
+global tailleperso# as double float : tailleperso# = 80 : rem 100 fait environ 2m
+global genouperso# as double float : genouperso# = 35
+make object sphere 2,radius#
+position object 2,-80,15,-20
+sc_setupObject 2,0,1
+hide object 2
+disable object zwrite 2
+make object sphere 3,radius#/5
+position object 3,-80,5,-20
+sc_setupObject 3,0,1
+hide object 3
+disable object zwrite 3
+make object sphere 4,radius#/2
+position object 4,-80,15,-20
+sc_setupObject 4,0,1
+hide object 4
+disable object zwrite 4
+
+
+rem On charge la carte
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+if file exist (game_carte$+".dbo") = 0
+load object game_carte$+".x",6
+else
+load object game_carte$+".dbo",6
+endif
+sc_setupComplexObject 6,1,2
+
+rem le ciel
+make object sphere 10,8000,15,60
+scale object 10,-250,-250,-250
+load image "sky.jpg",10,1
+texture object 10,10
+rotate object 10,180,140,0
+
+rem les armes
+set dir CheminMA$+"\Models\"
+load object "Snipe2.X",11
+disable object zdepth 11
+loop object 11,0,20
+set object speed 11,40
+exclude object on 11
+
+rem les roquettes
+dim Game_roket_tir(60)
+dim Game_roket_life(60)
+Game_roket_select = 1102
+Game_biroket_select = 1132
+for t=1100 to 1130
+load object "Roquette.x",t
+exclude object on t
+next
+for t=1131 to 1160
+load object "BiRoquette.x",t
+loop object t,0,20
+exclude object on t
+next
+
+rem les sons
+set dir CheminMA$+"\Sounds\"
+load sound "Snipe_catch.wav",1
+load sound "Snipe_tir.wav",2
+
+rem les images (réticule,entre autre)
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "REticule_sinpe.tga",15,1
+load image "Snipe.tga",14,1
+sprite 14,10000,100000,14
+
+rem la musique
+set dir CheminMA$+"\Musiques\"
+stop music 1
+delete music 1
+load music "Exploration.mp3",1
+set music volume 1,60
+loop music 1
+
+make object cube 13,1
+hide object 13
+
+for p=1 to 10
+ make particles p,1,1,5
+ set particle gravity p,0
+ set particle velocity p,10
+ set particle speed p,.05
+ set particle emissions p,0
+ set particle life p,5
+ color particles p,255,166,0
+next
+
+rem on enlève l'écran de chargement, la souris et on lance le jeu (très loin !!)
+delete sprite 4
+delete image 4
+hide mouse
+goto Exploration
+
+rem =========================================================================================================================
+rem ============================================== Lancement du jeu  ========================================================
+rem =========================================================================================================================
+rem ===================================== Transition de l'exploration vers le jeu ===========================================
+rem =========================================================================================================================
+
+Game_trans:
+rem position de départ
+x# = 0
+y# = 100
+rem la musique
+set dir CheminMA$+"\Musiques\Combat"
+stop music 1
+delete music 1
+open to read 1,"index.ini"
+read float 1,game_nb_baston_zik#
+game_nb_baston_zik = int(game_nb_baston_zik#)
+for t = 0 to game_nb_baston_zik
+read string 1,zikname$(t)
+next t
+load music zikname$(rnd(game_nb_baston_zik-1)),1
+loop music 1
+exclude object off 11
+play sound 1
+loop object 11
+goto Game

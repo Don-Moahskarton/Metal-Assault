@@ -1,0 +1,494 @@
+Rem *** Include File: Config.dba ***
+Rem Included in Project: C:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+Config:
+global config_menu_id
+rem on enlève le menu principal
+hide sprite 1
+hide sprite 2
+rem et on met le panneau de conf
+set dir CheminMA$+"\jpegs\menu"
+load image "config_général.bmp",10,1
+cls
+paste image 10,0,0
+config_menu_id = 1
+Config_delprofilestatus = 1
+Config_profilselectOLD = 999
+Config_selectprofilestatus = 1
+
+rem les menus latéraux
+do
+if mouseX() > 10 and mouseX() < 190
+   if mousey() > 30 and mouseY() < 65 and mouseclick() = 1
+   delete image 10
+   cls
+   set dir CheminMA$+"\jpegs\menu"
+   load image "config_général.bmp",10,1
+   paste image 10,0,0
+   config_menu_id = 1
+   endif
+
+   if mousey() > 75 and mouseY() < 110 and mouseclick() = 1
+   delete image 10
+   cls
+   set dir CheminMA$+"\jpegs\menu"
+   load image "config_Video.bmp",10,1
+   paste image 10,0,0
+   config_menu_id = 2
+   endif
+
+   if mousey() > 125 and mouseY() < 155 and mouseclick() = 1
+   delete image 10
+   cls
+   set dir CheminMA$+"\jpegs\menu"
+   load image "config_audio.bmp",10,1
+   paste image 10,0,0
+   config_menu_id = 3
+   endif
+
+   if mousey() > 720 and mouseY() < 755 and mouseclick() = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "param.txt"
+save array "param.txt",param(60)
+   delete image 10
+   cls
+   show sprite 1
+   show sprite 2
+   rem le fond
+
+   rem l'image de fond
+   set dir CheminMA$+"\jpegs\menu"
+   load image "Fond.jpg",100,1
+   paste image 100,0,0
+   goto menu_base
+   set display mode param(35),param(36),param(37)
+   endif
+endif
+
+
+
+select config_menu_id
+case 1
+gosub menu1
+endcase
+case 2
+gosub menu2
+endcase
+case 3
+gosub menu3
+endcase
+case 4
+gosub menu4
+endcase
+endselect
+
+loop
+
+
+menu1:
+confoption(507,530,57,70,92,103,0,1,1)
+confoption(392,416,96,108,131,142,-999,999,2)
+confoption(432,455,132,144,167,178,1,999,3)
+confoption(395,418,167,179,202,213,1,999,4)
+confoption(530,553,207,219,242,254,1,999,5)
+confoption(583,606,249,262,284,295,-999,999,6)
+confoption(550,573,286,298,320,332,-999,999,7)
+confoption(587,610,325,337,360,372,-999,999,8)
+confoption(632,655,368,380,403,415,-999,999,9)
+confoption(578,600,413,425,448,460,0,999,10)
+confoption(468,491,457,469,492,503,-999,999,11)
+confoption(502,525,499,511,534,545,-999,999,12)
+confoption(549,572,541,553,576,587,-999,999,13)
+confoption(595,918,579,591,614,625,1,999,14)
+confoption(516,539,619,631,654,666,1,999,15)
+confoption(552,576,658,670,693,704,1,999,16)
+confoption(585,608,696,707,730,742,-999,999,17)
+confoption(638,662,718,732,753,764,-999,999,18)
+confoption(949,972,97,109,132,143,-999,999,19)
+confoption(918,942,138,150,173,184,0,999,20)
+confoption(889,913,179,191,214,226,0,999,21)
+confoption(921,944,221,234,257,268,0,999,22)
+confoption(956,980,271,283,306,318,-999,999,23)
+confoption(876,900,312,324,347,359,1,999,24)
+confoption(838,861,358,370,393,404,1,999,25)
+confoption(876,899,400,412,435,446,1,999,26)
+confoption(854,877,449,461,484,495,1,999,27)
+confoption(963,986,488,500,524,534,-999,999,28)
+confoption(887,910,529,541,564,575,0,999,29)
+confoption(854,877,574,586,610,620,-999,999,30)
+rem le boutton config autre
+if mouseX() > 660 and mouseX() < 965 and mouseY() > 655 and mousey() < 710 and mouseclick() = 1
+set dir CheminMA$+"\jpegs\menu"
+load image "config_autre.bmp",11,1
+set dir CheminMA$+"\configs\"
+open to read 1,"index.ini"
+read string 1,config_nblignes$
+config_nblignes = val(config_nblignes$)
+for i = 0 to config_nblignes
+read string 1,temp$
+Config_listeprofil$(i) = temp$
+next i
+close file 1
+config_menu_id = 4
+endif
+return
+
+
+
+
+
+
+
+menu2:
+confoption(380,404,119,131,154,165,0,99999,35)
+confoption(415,449,119,131,154,165,0,99999,36)
+confoption(433,456,168,180,203,215,0,99,37)
+confoption(425,448,222,234,257,269,0,3,38)
+confoption(465,488,269,281,304,315,0,3,39)
+confoption(414,437,316,328,351,362,0,1,40)
+confoption(375,398,364,376,399,410,0,1,41)
+confoption(411,434,411,423,446,456,0,1,42)
+confoption(471,494,467,479,502,513,0,100,43)
+confoption(406,429,509,521,544,555,0,999,44)
+confoption(403,426,559,571,594,605,0,1,45)
+confoption(433,456,600,612,635,647,0,3,46)
+confoption(363,386,644,656,679,691,0,1,47)
+return
+
+
+
+
+menu3:
+confoption(469,495,90,100,125,136,0,100,31)
+confoption(420,443,122,135,158,169,0,100,32)
+confoption(460,483,159,171,194,205,0,100,33)
+confoption(398,421,208,220,243,254,0,1,34)
+return
+
+
+
+
+
+menu4:
+confoption(0,0,0,0,0,0,0,0,0)
+if boutton2(685,87,707,104) = 1 then delete image 11 : config_menu_id = 1
+
+if boutton2(322,638,508,670) = 1
+set dir CheminMA$+"\configs\"
+for i = 0 to config_nblignes
+set cursor 360,470+i*15 : print Config_listeprofil$(i)
+temp = 470+i*15+15
+next i
+set cursor 360,temp
+input ">:",Config_newdrname$
+make directory Config_newdrname$
+copy file "default\param.txt",Config_newdrname$+"\param.txt"
+copy file "default\keymap.txt",Config_newdrname$+"\keymap.txt"
+copy file "default\stats.txt",Config_newdrname$+"\stats.txt"
+delete file "index.ini"
+open to write 1,"index.ini"
+write string 1,str$(config_nblignes+1)
+for i = 0 to config_nblignes-1
+temp$ = Config_listeprofil$(i)
+write string 1,temp$
+next i
+write string 1,Config_newdrname$
+close file 1
+open to read 1,"index.ini"
+read string 1,config_nblignes$
+config_nblignes = val(config_nblignes$)
+for i = 0 to config_nblignes
+read string 1,temp$
+Config_listeprofil$(i) = temp$
+next i
+close file 1
+endif
+
+
+if mousex() > 358 and  622 > mousex() and mouseclick() = 1 and Config_selectprofilestatus = 1
+Config_selectprofilestatus = 0
+Config_profilselectOLD = Config_profilselect
+if 470<mousey() and mousey()<480
+Config_profilselect = 0
+endif
+if 480<mousey() and mousey()<495
+Config_profilselect = 1
+endif
+if 500<mousey() and  mousey()<510
+Config_profilselect = 2
+endif
+if 510<mousey() and mousey()<525
+Config_profilselect = 3
+endif
+if 525<mousey() and mousey()<540
+Config_profilselect = 4
+endif
+if 540<mousey() and mousey()<555
+Config_profilselect = 5
+endif
+if 555<mousey() and mousey()<570
+Config_profilselect = 6
+endif
+if 570<mousey() and mousey()<595
+Config_profilselect = 7
+endif
+if 595<mousey() and mousey()<610
+Config_profilselect = 8
+endif
+if 610<mousey() and mousey()<625
+Config_profilselect = 9
+endif
+endif
+if Config_selectprofilestatus = 0 and mouseclick() =0 then Config_selectprofilestatus = 1
+
+if boutton2(508,638,881,670) = 1 and Config_delprofilestatus = 1 and config_nblignes>0 and Config_profilselect > 0
+Config_delprofilestatus = 0
+delete directory Config_listeprofil$(Config_profilselect)
+dec config_nblignes
+for i = Config_profilselect to 8
+Config_listeprofil$(i) = Config_listeprofil$(i+1)
+next i
+delete file "index.ini"
+open to write 1,"index.ini"
+write string 1,str$(config_nblignes)
+for i = 0 to config_nblignes
+temp$ = Config_listeprofil$(i)
+write string 1,temp$
+next i
+close file 1
+Config_profilselect = 0
+Config_profilselectOLD = 999
+endif
+if Config_delprofilestatus = 0 and mouseclick() =0 then Config_delprofilestatus = 1
+
+
+if Config_profilselectOLD = Config_profilselect
+gosub Config_Switch_profile
+endif
+
+if 608<mousex() and mousex()<702 and mouseclick() = 1
+
+if 128<mousey() and mousey()<150 then param(48) = getkey(0)
+if 150<mousey() and mousey()<180 then param(49) = getkey(1)
+if 180<mousey() and mousey()<207 then param(50) = getkey(2)
+if 207<mousey() and mousey()<234 then param(51) = getkey(3)
+if 234<mousey() and mousey()<261 then param(52) = getkey(4)
+if 261<mousey() and mousey()<290 then param(53) = getkey(5)
+if 290<mousey() and mousey()<321 then param(54) = getkey(6)
+if 321<mousey() and mousey()<355 then param(55) = getkey(7)
+if 355<mousey() and mousey()<384 then param(56) = getkey(8)
+
+endif
+
+return
+
+
+
+
+
+Config_Switch_profile:
+set dir CheminMA$+"\configs\"
+if path exist(CheminMA$+"\configs\"+Configjoueur$) = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "param.txt"
+save array "param.txt",param(60)
+delete file "keymap.txt"
+save array "keymap.txt",Config_keymap$(9)
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+endif
+Configjoueur$ = Config_listeprofil$(Config_profilselect)
+set dir CheminMA$+"\configs\"+Configjoueur$
+load array "param.txt",param(60)
+load array "keymap.txt",Config_keymap$(9)
+load array "Stats.txt",Player_stats(10)
+set dir CheminMA$
+delete file "Metal Assault.ini"
+open to write 1,"Metal Assault.ini"
+write string 1,Configjoueur$
+write string 1,Lireintro$
+close file 1
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+end
+function majconf(menu)
+select menu
+case 1
+cls
+ink rgb(255,255,255),1
+paste image 10,0,0
+set cursor 507,72 : print param(1)
+set cursor 392,111 : print param(2)
+set cursor 432,148 : print param(3)
+set cursor 395,183 : print param(4)
+set cursor 530,223 : print param(5)
+set cursor 583,264 : print param(6)
+set cursor 550,302 : print param(7)
+set cursor 587,340 : print param(8)
+set cursor 632,383 : print param(9)
+set cursor 578,428 : print param(10)
+set cursor 468,472 : print param(11)
+set cursor 502,514 : print param(12)
+set cursor 549,556 : print param(13)
+set cursor 595,594 : print param(14)
+set cursor 516,634 : print param(15)
+set cursor 552,673 : print param(16)
+set cursor 585,710 : print param(17)
+set cursor 638,735 : print param(18)
+set cursor 949,112 : print param(19)
+set cursor 918,153 : print param(20)
+set cursor 889,194 : print param(21)
+set cursor 921,237 : print param(22)
+set cursor 956,286 : print param(23)
+set cursor 876,327 : print param(24)
+set cursor 838,373 : print param(25)
+set cursor 876,415 : print param(26)
+set cursor 854,464 : print param(27)
+set cursor 963,503 : print param(28)
+set cursor 887,544 : print param(29)
+set cursor 854,589 : print param(30)
+endcase
+case 2
+cls
+ink rgb(255,255,255),1
+paste image 10,0,0
+set cursor 375,135 : print param(35)
+set cursor 425,135 : print param(36)
+set cursor 433,183 : print param(37)
+set cursor 425,237 : print param(38)
+set cursor 465,284 : print param(39)
+set cursor 414,331 : print param(40)
+set cursor 375,378 : print param(41)
+set cursor 411,426 : print param(42)
+set cursor 471,482 : print param(43)
+set cursor 406,525 : print param(44)
+set cursor 403,575 : print param(45)
+set cursor 433,615 : print param(46)
+set cursor 363,659 : print param(47)
+endcase
+case 3
+cls
+ink rgb(255,255,255),1
+paste image 10,0,0
+set cursor 469,105 : print param(31)
+set cursor 420,138 : print param(32)
+set cursor 460,174 : print param(33)
+set cursor 398,223 : print param(34)
+endcase
+case 4
+cls
+ink rgb(255,255,255),1
+paste image 10,0,0
+set cursor 507,72 : print param(1)
+set cursor 392,111 : print param(2)
+set cursor 432,148 : print param(3)
+set cursor 395,183 : print param(4)
+set cursor 530,223 : print param(5)
+set cursor 583,264 : print param(6)
+set cursor 550,302 : print param(7)
+set cursor 587,340 : print param(8)
+set cursor 632,383 : print param(9)
+set cursor 578,428 : print param(10)
+set cursor 468,472 : print param(11)
+set cursor 502,514 : print param(12)
+set cursor 549,556 : print param(13)
+set cursor 595,594 : print param(14)
+set cursor 516,634 : print param(15)
+set cursor 552,673 : print param(16)
+set cursor 585,710 : print param(17)
+set cursor 638,735 : print param(18)
+set cursor 949,112 : print param(19)
+set cursor 918,153 : print param(20)
+set cursor 889,194 : print param(21)
+set cursor 921,237 : print param(22)
+set cursor 956,286 : print param(23)
+set cursor 876,327 : print param(24)
+set cursor 838,373 : print param(25)
+set cursor 876,415 : print param(26)
+set cursor 854,464 : print param(27)
+set cursor 963,503 : print param(28)
+set cursor 887,544 : print param(29)
+set cursor 854,589 : print param(30)
+paste image 11,312,84
+set cursor 640,132 :print Config_keymap$(0)
+set cursor 640,160 :print Config_keymap$(1)
+set cursor 640,186 :print Config_keymap$(2)
+set cursor 640,215 :print Config_keymap$(3)
+set cursor 610,240 :print Config_keymap$(4)
+set cursor 610,270 :print Config_keymap$(5)
+set cursor 610,300 :print Config_keymap$(6)
+set cursor 640,330 :print Config_keymap$(7)
+set cursor 640,365 :print Config_keymap$(8)
+for i = 0 to 9
+ink rgb(255,255,255),1
+temp$ = Config_listeprofil$(i)
+if temp$ = Configjoueur$
+ink rgb(0,0,255),1
+endif
+if temp$ = Config_listeprofil$(Config_profilselect)
+ink rgb(120,120,120),1
+endif
+set cursor 360,470+i*15 : print Config_listeprofil$(i)
+next i
+endcase
+endselect
+endfunction
+
+function confoption(droite,gauche,haut1,bas1,haut2,bas2,min,max,index)
+if boutton(droite,gauche,haut1,bas1) = 1 then inc param(index)
+if boutton(droite,gauche,haut2,bas2) = 1 then dec param(index)
+if param(index) > max then param(index) = max
+if param(index) < min then param(index) = min
+majconf(config_menu_id)
+endfunction
+
+function getkey(index)
+position mouse param(35)/2,param(36)/2
+do
+if mouseclick() = 0 then exit
+loop
+set dir CheminMA$+"\jpegs\menu"
+load image "Config_Presskey.bmp",12,1
+oldmousz = mousez()
+do
+majconf(config_menu_id)
+paste image 12,312,450
+if scancode() > 0 or mouseclick() > 0 then exit
+mousz = mousez()
+if mousz = oldmousz
+else
+exit
+endif
+loop
+delete image 12
+temp  =  scancode()
+Config_keymap$(index) = inkey$()
+if temp=57 then key$="Espace"
+if temp=29 or code=157 then key$="Ctrl"
+if temp=42 or code=54 then key$="Maj"
+if temp=200 then key$="Up"
+if temp=208 then key$="Down"
+if temp=203 then key$="Left"
+if temp=205 then key$="Right"
+if temp = 0
+if mouseclick() = 1 then Config_keymap$(index) = "Click gauche"
+if mouseclick() = 2 then Config_keymap$(index) = "Click droit"
+if mouseclick() = 4 then Config_keymap$(index) = "Click Milieu"
+if mousz > oldmousz then Config_keymap$(index) = "Molette haut"
+if mousz < oldmousz then Config_keymap$(index) = "Molette Bas"
+endif
+endfunction temp
+
+

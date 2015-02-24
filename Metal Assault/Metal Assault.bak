@@ -1,0 +1,643 @@
+GLOBAL pseu_old_saisie_clavier$
+GLOBAL pseu_saisie_clavier$
+GLOBAL pseu_ligne$
+GLOBAL pseu_a_gauche_du_curseur$
+GLOBAL pseu_a_droite_du_curseur$
+GLOBAL pseu_ligne_final$
+GLOBAL pseu_old_azerty
+GLOBAL pseu_azerty
+GLOBAL pseu_newtime
+GLOBAL pseu_cursor_position=1
+GLOBAL pseu_longueur_ligne
+GLOBAL pseu_curseur_visible
+GLOBAL Configjoueur$
+GLOBAL Config_profilselect
+GLOBAL CheminMA$
+GLOBAL temp
+GLOBAL Multi_nb_player = 0
+
+#Constant New_player_data = 1
+#Constant Player_Left = 2
+#Constant MSG = 3
+#Constant PrePartie_info = 4
+#Constant Player_accepted_in_game = 4
+#Constant MAXIMUM_PLAYERS = 128
+
+type Vector
+X as float
+Y as Float
+Z as float
+endtype
+
+Game_eau_Vector as Vector
+
+type arme
+name$ as string
+price as integer
+poid as integer
+Chargeur_start as integer
+BuletsparChargeur as integer
+Bulets_Stock as integer
+Bulets_encour as integer
+Bulets_ametre as integer
+endtype
+
+type Goliath
+X as integer
+Y as integer
+Z as integer
+Vitesse as integer
+Gachette_etat as integer
+occupe as integer
+endtype
+
+type Vautour
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+endtype
+
+type V2CI
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+endtype
+
+type Coleoptere
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+collide2 as float
+endtype
+
+type Faucon
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+collide2 as float
+endtype
+
+type Escompide
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+collide2 as float
+endtype
+
+type MotoD
+X# as float
+Y# as float
+Z# as float
+tourelle_occupe as integer
+pilote_occupe as integer
+xspeed# as float
+yspeed# as float
+anglX# as float
+anglY# as float
+oldX# as float
+oldY# as float
+oldZ# as float
+porte as float
+collide as float
+collide2 as float
+endtype
+
+type txt
+string$ as string
+size as integer
+red as integer
+green as integer
+blue as integer
+X as integer
+Y as integer
+img_nb as integer
+sprite_nb as integer
+temp as integer
+lastspeed as integer
+endtype
+
+type droide
+name$ as string
+Vie as integer
+Decision as integer
+DecisionDuree as integer
+DecisionVitesse# as float
+Precision as integer
+temptir as integer
+tirpossible as integer
+cible as integer
+objet as integer
+tete as integer
+collide as integer
+tircollide as integer
+x# as float
+y# as float
+z# as float
+xtemp# as float
+ytemp# as float
+ztemp# as float
+oX# as float
+oY# as float
+oZ# as float
+tipe as integer
+respawn_pt as integer
+Rspn as integer
+cible as integer
+frag as integer
+mort as integer
+endtype
+
+type Water
+ObjNum as integer
+ImgNum as integer
+ImgNum2 as integer
+ImgNum3 as integer
+ImgNum4 as integer
+FXNum as integer
+technique as integer
+Reflect as integer
+Refract as integer
+R as integer
+G as integer
+B as integer
+Image$ as string
+SX as integer
+SZ as integer
+X as integer
+WaterHeight# as float
+Z as integer
+WaterCamY# as float
+Ghost as integer
+CamA as integer
+CamB as integer
+ClipY# as float
+endtype
+
+type ordi
+name$ As String : rem le nom n'est pas une valeur calculable comme les autres, elle peut être définie avant que le client n'ait rejoind la partie
+rem en fait c'est pareil pour tout les parametres définis
+Faction as byte rem 0 pour la RHL et 1 pour la CID
+touche_1 as byte
+touche_2 as byte
+touche_3 as byte
+touche_4 as byte
+touche_5 as byte
+touche_6 as byte
+mouseclic as byte
+mousemove_x# as float
+mousemove_y# as float
+mouse_x as integer
+mouse_y as integer
+endtype
+
+
+
+rem Chargement de la configuration du jeu
+open to read 1,"metal Assault.ini"
+read string 1,Configjoueur$
+read string 1,Lireintro$
+Lireintro = val(Lireintro$)
+close file 1
+CheminMA$ = get dir$()
+dim param(60)
+dim Config_keymap$(9)
+dim Player_stats(10)
+dim listarme(100) as arme
+dim game_arme_embaquee(100)
+set dir CheminMA$+"\configs\"+Configjoueur$
+load array "param.txt",param(60)
+load array "keymap.txt",Config_keymap$(9)
+load array "Stats.txt",Player_stats(10)
+dim Solo_CarteNom$(256)
+dim zikname$(256)
+dim Solo_dompts(256,4)
+dim Solo_dompts_Dcibles(256,4)
+dim Script_datas$(10000)
+dim Config_listeprofil$(10)
+dim txt(256) as txt
+dim contour(100,4)
+dim Bot(10000) as droide
+dim allie(10000) as droide
+dim nomhumain$(41)
+dim game_console$(41)
+dim game_console_time(15)
+global dim Water(256) as water
+Global Water_Exist = 0
+dim Goliaths(100) as Goliath
+dim Faucons(100) as Faucon
+dim Vautours(100) as Vautour
+dim Escompides(100) as Escompide
+dim V2CIs(100) as V2CI
+dim MotoDs(100) as motoD
+dim Coleopteres(100) as coleoptere
+dim joueurs(1) as ordi
+gosub Setup_database
+randomize timer()
+clear entry buffer
+
+
+rem on vois si on peut enregistrer le chemin de MA dans un lieu sur, pour les MAJ
+set dir windir$()+"\system32\"
+if file exist("ma.ini") = 0
+open to write 1,"ma.ini"
+write string 1,CheminMA$
+endif
+close file 1
+
+rem initialisation du Système
+set display mode param(35),param(36),param(37)
+cls
+make memblock 154,1 : rem pour les DLLs
+hide mouse
+disable escapekey
+set text font "arial",1
+
+
+
+debut:
+
+menu_id = 0
+draw sprites last
+
+rem l'ecran de chargement
+      load dll "user32.dll",1
+      Sw=call dll(1,"GetSystemMetrics",0)
+      Sh=call dll(1,"GetSystemMetrics",1)
+      delete dll 1
+
+Set window on
+set window size 400,400
+set window layout 0,0,1
+set window position Sw/2-200,Sh/2-200
+set dir   CheminMA$+"\Jpegs\Splashs"
+set image colorkey 255,0,0
+load image "Splash01.jpg",4
+set image colorkey 0,0,0
+sprite 4,0,0,4
+size sprite 4,param(35),param(36)
+wait 1000
+
+
+
+rem l'ecran de chargement
+set dir CheminMA$+"\Jpegs\Splashs"
+set image colorkey 255,0,0
+delete image 4
+load image "Splash02.jpg",4
+set image colorkey 0,0,0
+sprite 4,0,0,4
+size sprite 4,param(35),param(36)
+wait 1000
+
+rem l'ecran de chargement
+set dir CheminMA$+"\Jpegs\Splashs"
+set image colorkey 255,0,0
+delete image 4
+load image "Splash03.jpg",4
+set image colorkey 0,0,0
+sprite 4,0,0,4
+size sprite 4,param(35),param(36)
+wait 1000
+
+delete sprite 4
+delete image 4
+Set window off
+
+position mouse param(35)/2,param(36)/2
+
+rem intro, monsieur, intro
+if Lireintro = 1 then gosub intro
+
+rem l'objet de fond
+
+menu_type = 0
+if menu_type = 0
+set dir CheminMA$+"\Models\Menus\1\"
+set camera range 1,30000
+color backdrop rgb(0,0,0)
+load object "Menu.x",1
+set object speed 1,100
+set object frame 1,100,1
+set object interpolation 1,100
+loop object 1
+endif
+if menu_type = 1
+set dir CheminMA$+"\Models\Menus\2\"
+load object "Menu.x",1
+set object speed 1,10
+set object interpolation 1,100
+loop object 1
+set object transparency 1,4
+position camera 43,11,-31
+point camera -16,3,48
+make light 1
+position light 1,camera position X(),camera position y(),camera position z()
+autocam off
+load object "skybox.x",2
+scale object 2,1000,1000,1000
+set object light 2,0
+endif
+
+
+rem le menu
+set dir CheminMA$+"\jpegs\menu"
+load image "Primaire.jpg",1,1
+sprite 1,0,param(36)-420,1
+set sprite 1,1,1
+show sprite 1
+
+rem création du tableau de coordonés bouttons
+dim coorbouttons(11,4,2)
+coorbouttons(1,1,1) = 50
+coorbouttons(1,1,2) = param(36)-370
+coorbouttons(1,2,1) = 230
+coorbouttons(1,2,2) = param(36)-370
+coorbouttons(1,3,1) = 50
+coorbouttons(1,3,2) = param(36)-335
+coorbouttons(1,4,1) = 230
+coorbouttons(1,4,2) = param(36)-335
+coorbouttons(2,1,1) = 50
+coorbouttons(2,1,2) = param(36)-305
+coorbouttons(2,2,1) = 230
+coorbouttons(2,2,2) = param(36)-305
+coorbouttons(2,3,1) = 50
+coorbouttons(2,3,2) = param(36)-265
+coorbouttons(2,4,1) = 230
+coorbouttons(2,4,2) = param(36)-265
+coorbouttons(3,1,1) = 50
+coorbouttons(3,1,2) = param(36)-240
+coorbouttons(3,2,1) = 230
+coorbouttons(3,2,2) = param(36)-240
+coorbouttons(3,3,1) = 50
+coorbouttons(3,3,2) = param(36)-190
+coorbouttons(3,4,1) = 230
+coorbouttons(3,4,2) = param(36)-190
+coorbouttons(4,1,1) = 50
+coorbouttons(4,1,2) = param(36)-170
+coorbouttons(4,2,1) = 230
+coorbouttons(4,2,2) = param(36)-170
+coorbouttons(4,3,1) = 50
+coorbouttons(4,3,2) = param(36)-130
+coorbouttons(4,4,1) = 230
+coorbouttons(4,4,2) = param(36)-130
+coorbouttons(5,1,1) = 50
+coorbouttons(5,1,2) = param(36)-105
+coorbouttons(5,2,1) = 230
+coorbouttons(5,2,2) = param(36)-105
+coorbouttons(5,3,1) = 50
+coorbouttons(5,3,2) = param(36)-65
+coorbouttons(5,4,1) = 230
+coorbouttons(5,4,2) = param(36)-65
+coorbouttons(6,1,1) = 275
+coorbouttons(6,1,2) = param(36)-352
+coorbouttons(6,2,1) = 430
+coorbouttons(6,2,2) = param(36)-352
+coorbouttons(6,3,1) = 275
+coorbouttons(6,3,2) = param(36)-312
+coorbouttons(6,4,1) = 430
+coorbouttons(6,4,2) = param(36)-312
+coorbouttons(7,1,1) = 275
+coorbouttons(7,1,2) = param(36)-312
+coorbouttons(7,2,1) = 430
+coorbouttons(7,2,2) = param(36)-312
+coorbouttons(7,3,1) = 275
+coorbouttons(7,3,2) = param(36)-257
+coorbouttons(7,4,1) = 430
+coorbouttons(7,4,2) = param(36)-257
+coorbouttons(8,1,1) = 275
+coorbouttons(8,1,2) = param(36)-257
+coorbouttons(8,2,1) = 430
+coorbouttons(8,2,2) = param(36)-257
+coorbouttons(8,3,1) = 275
+coorbouttons(8,3,2) = param(36)-217
+coorbouttons(8,4,1) = 430
+coorbouttons(8,4,2) = param(36)-217
+coorbouttons(9,1,1) = 275
+coorbouttons(9,1,2) = param(36)-217
+coorbouttons(9,2,1) = 430
+coorbouttons(9,2,2) = param(36)-217
+coorbouttons(9,3,1) = 275
+coorbouttons(9,3,2) = param(36)-167
+coorbouttons(9,4,1) = 430
+coorbouttons(9,4,2) = param(36)-167
+coorbouttons(10,1,1) = 275
+coorbouttons(10,1,2) = param(36)-167
+coorbouttons(10,2,1) = 430
+coorbouttons(10,2,2) = param(36)-167
+coorbouttons(10,3,1) = 275
+coorbouttons(10,3,2) = param(36)-117
+coorbouttons(10,4,1) = 430
+coorbouttons(10,4,2) = param(36)-117
+coorbouttons(11,1,1) = 275
+coorbouttons(11,1,2) = param(36)-117
+coorbouttons(11,2,1) = 430
+coorbouttons(11,2,2) = param(36)-117
+coorbouttons(11,3,1) = 275
+coorbouttons(11,3,2) = param(36)-61
+coorbouttons(11,4,1) = 430
+coorbouttons(11,4,2) = param(36)-61
+rem ouverture du menu a l'utilisateur
+show mouse
+disable escapekey
+
+rem et boucle du menu (avec chargement des images en temp  réel)
+menu_base:
+sync off
+
+
+do
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+set cursor 0,0
+inc temporel,Extrapolation*3
+inc temporel2#
+gosub menu_cammov
+
+gosub menuaux_arivee
+if mouseclick() = 1
+if mousex()>50 and mousex()<230
+if mousey()> coorbouttons(1,1,2) and mousey() < coorbouttons(1,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 1 then delete image 2
+load image "soloaux.jpg",2,1
+menuaux_image = 2
+menu_id = 1
+endif
+if mousey()> coorbouttons(2,1,2) and mousey() < coorbouttons(2,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 2 then delete image 2
+load image "multiaux.jpg",2,1
+menuaux_image = 2
+menu_id = 2
+endif
+if mousey()> coorbouttons(3,1,2) and mousey() < coorbouttons(3,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 3 then delete image 2
+load image "netaux.jpg",2,1
+menuaux_image = 2
+menu_id = 3
+endif
+if mousey()> coorbouttons(4,1,2) and mousey() < coorbouttons(4,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 4 then delete image 2
+load image "configaux.jpg",2,1
+menuaux_image = 2
+menu_id = 4
+endif
+if mousey()> coorbouttons(5,1,2) and mousey() < coorbouttons(5,3,2)
+end
+endif
+endif
+endif
+goto menu_aux
+show sprite 2
+
+loop
+
+rem les sous menus
+menu_aux:
+if mouseclick() = 1
+ if mouseX()>275 and mouseX()<430
+   if mousey()> coorbouttons(6,1,2) and mousey() < coorbouttons(6,3,2) and mouseclick() = 1
+     if menu_id = 2 then Menu_SRV = 1 : goto Multi_prepa_partie
+     if menu_id = 4 then goto Config
+     if menu_id = 3 then Menu_multi_proto_type = 0 : goto Multi_Rejoindre : rem 0 pour internet
+     gosub beta
+   endif
+   if mousey()> coorbouttons(7,1,2) and mousey() < coorbouttons(7,3,2) and mouseclick() = 1
+     if menu_id = 1 then goto matchamort
+     if menu_id = 2 then Menu_multi_proto_type = 1 : goto Multi_Rejoindre : rem 1 pour lan
+     gosub beta
+   endif
+   if mousey()> coorbouttons(8,1,2) and mousey() < coorbouttons(8,3,2) and mouseclick() = 1
+     gosub beta
+     endif
+   if mousey()> coorbouttons(9,1,2) and mousey() < coorbouttons(9,3,2) and mouseclick() = 1
+   if menu_id = 4 then goto Credits
+     gosub beta
+     endif
+   if mousey()> coorbouttons(10,1,2) and mousey() < coorbouttons(10,3,2) and mouseclick() = 1
+   if menu_id = 1 then goto Domination
+     gosub beta
+     endif
+   if mousey()> coorbouttons(11,1,2) and mousey() < coorbouttons(11,3,2) and mouseclick() = 1
+      if menu_id = 2 then goto Multi_profil
+      if menu_id = 3 then goto Multi_profil
+     gosub beta
+   endif
+ endif
+endif
+goto menu_base
+
+
+Credits:
+set dir CheminMA$+"\anims"
+load animation "Credit.avi",1
+place animation 1,0,0,param(35),param(36)
+play animation 1
+set animation speed 1,100
+hide sprite 1
+hide sprite 2
+repeat
+until animation playing(1) = 0 or returnkey() = 1 or escapekey() = 1
+stop animation 1
+place animation 1,0,0,1,1
+delete animation 1
+
+show sprite 1
+show sprite 2
+loop animation 1
+goto menu_base
+
+rem les fontions du menu
+end
+menuaux_arivee:
+if menuaux_image=0 then return
+sprite 2,215,param(36)-arrive,menuaux_image
+inc arrive,40
+if arrive > 400 then menuaux_image = 0 :arrive = 0
+return
+
+beta:
+set dir CheminMA$+"\jpegs\menu"
+load image "beta.jpg",3,1
+sprite 3,364,364,3
+do
+if mouseclick() = 1
+if mouseX() > 46+364 and mouseX() < 195+364
+if mouseY() > 98+364 and mouseY() < 127+364
+delete image 3
+delete sprite 3
+exit
+endif
+endif
+endif
+loop
+wait 200
+return
+
+
+Menu_cammov:
+if menu_type = 0
+position camera 200+100*sin(temporel2#/4.5),507,-1715+250*sin(temporel2#*1.5/8)
+point camera 200,-5-abs(10*sin(temporel2#/4.5)),0
+endif
+
+return
+

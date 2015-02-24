@@ -1,0 +1,102 @@
+Rem *** Include File: Solo_Domination_Persos.dba ***
+Rem Created: 05/04/2008 20:02:11
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+
+IAdomination:
+i = 0
+print
+rem def des pts a prendre
+for t = 0 to game_dompts#
+temp = Solo_dompts(t,4)
+select temp
+case 0
+inc i
+Solo_dompts_Dcibles(i) = t+1200
+Solo_iadom_nbcibles = i
+endcase
+case 2
+inc i
+Solo_dompts_Dcibles(i) = t+1200
+Solo_iadom_nbcibles = i
+endcase
+endselect
+print object position x(i), "    ",object position y(i),"    ",object position z(i)
+print
+next t
+if Solo_iadom_cible_ateinte = 1
+Solo_iadom_cible = rnd(Solo_iadom_nbcibles-1)+1201
+endif
+Solo_iadom_cible_ateinte = 0
+if distance(5000,Solo_iadom_cible)<80
+color object Solo_iadom_cible,RGB(0,0,255)
+Solo_dompts(Solo_iadom_cible-1200,4) = 1
+Solo_iadom_cible_ateinte = 1
+endif
+
+
+
+
+if VieD > 0
+
+
+
+
+position object 5000,dX#,dY#,dZ#
+point object 5000,object position x(Solo_iadom_cible),object position y(Solo_iadom_cible),object position z(Solo_iadom_cible)
+if distance(5000,3)> 300
+oX# = object position X(5000)
+oY# = object position Y(5000)
+oZ# = object position Z(5000)
+move object 5000,((FPS*-1)+400)/20
+dX# = object position X(5000)
+dY# = object position Y(5000)
+dZ# = object position Z(5000)
+dec dY#,nbwarmachines*5
+botcollide = SC_SphereCast(1,ox#,oy#,oz#,dX#,dY#,dZ#,20+ nbsentinelles*50,0)
+if botcollide
+dX# = SC_getcollisionslideX()
+dY# = SC_getcollisionslideY()
+dZ# = SC_getcollisionslideZ()
+endif
+position object 5000,dX#,dY#,dZ#
+if nbsentinelles = 1 then position object 5001,dx#,dy#+180,dz#
+endif
+
+
+if dtime+1000 + nbwarmachines*1000<timer()
+IA_tir_possible = 1
+else
+IA_tir_possible =0
+endif
+
+if IA_tir_possible = 1
+point object 5000,object position x(3),object position y(3)+tailleperso#,object position z(3)
+dX# = object position X(5000)
+dY# = object position Y(5000)
+dZ# = object position Z(5000)
+move object 5000,20000
+dXtemp# = object position X(5000)
+dYtemp# = object position Y(5000)
+dZtemp# = object position Z(5000)
+move object 5000,-20000
+point object 5000,object position x(Solo_iadom_cible),object position y(Solo_iadom_cible),object position z(Solo_iadom_cible)
+IAcollide = SC_rayCast(0,dX#,dY#,dZ#,dXtemp#,dYtemp#,dZtemp#,0)
+if IAcollide = 1002 and IA_tir_possible = 1
+temp = rnd(100)
+IAtircollide = SC_rayCast(0,dX#,dY#,dZ#,X#,Y#,Z#,0)
+play sound 1103
+if temp < 65 - nbwarmachines*20 and IAtircollide = 0 : rem le pourcentage du droîde
+dec vie,rnd(40)
+dam_warn = 200
+IA_tir_possible =0
+dtime  = timer()
+endif
+endif
+endif
+
+endif
+
+
+return

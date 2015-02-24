@@ -1,0 +1,559 @@
+Rem *** Include File: Solo_matchamort.dba ***
+Rem Created: 16/01/2008 07:41:04
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+rem le match a mort
+matchamort:
+Fraglimit = 10
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+load image "Solo_select.jpg",4,1
+sprite 4,-257,0,4
+load image "Solo_preview.jpg",5,1
+sprite 5,param(35)-512,-257,5
+load image "Solo_Brefing.jpg",6,1
+sprite 6,param(35),param(36)-512,6
+load image "Solo_Descrition.jpg",7,1
+sprite 7,param(35)/2,param(36),7
+Solo_arrive = 0
+
+for Partie_solo = 6 to 246 step 10
+rem on bouge la camera
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+inc temporel,Extrapolation*3
+inc temporel2#
+gosub menu_cammov
+
+wait 0
+inc Solo_arrive,10
+sprite 4,-257+Solo_arrive,0,4
+sprite 5,param(35)-512,-257+Solo_arrive,5
+sprite 6,param(35)-Solo_arrive,param(36)-512,6
+sprite 7,param(35)/2,param(36)-Solo_arrive,7
+next Partie_solo
+
+set dir CheminMA$+"\Cartes\Match_Mort"
+open to read 1,"index.ini"
+read float 1,Solo_nbCartes#
+Solo_nbCartes = int(Solo_nbCartes#)
+if Solo_nbCartes = 0 then exit prompt "Il n'y a aucune carte dans le jeu !","Metal assault Erreur" : end
+for Carteliste_solo = 0 to Solo_nbCartes
+read string 1,Solo_CarteNom$(Carteliste_solo)
+next Carteliste_solo
+close file 1
+
+rem config default
+nbsentinelles = 1
+nbwarmachines = 0
+
+
+do
+rem on bouge la camera
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+inc temporel,Extrapolation*3
+inc temporel2#
+gosub menu_cammov
+
+rem affichage des noms des cartes
+         set text size 16
+         set text to bolD
+         create bitmap 1,256,256
+         if Solo_nbCartes > 0
+         print Solo_CarteNom$(0)
+         get image 10,0,0,200,20
+         sprite 10,0,95,10
+         cls
+         endif
+         delete bitmap 1
+         create bitmap 1,256,256
+         if Solo_nbCartes > 1
+         print Solo_CarteNom$(1)
+         get image 11,0,0,200,20
+         sprite 11,0,145,11
+         cls
+         endif
+         delete bitmap 1
+         create bitmap 1,256,256
+         if Solo_nbCartes > 2
+         print Solo_CarteNom$(2)
+         get image 12,0,0,200,20
+         sprite 12,0,185,12
+         cls
+         endif
+         delete bitmap 1
+         create bitmap 1,256,256
+         if Solo_nbCartes > 3
+         print Solo_CarteNom$(3)
+         get image 13,0,0,200,20
+         sprite 13,0,225,13
+         cls
+         endif
+         delete bitmap 1
+         create bitmap 1,256,256
+         if Solo_nbCartes > 4
+         print Solo_CarteNom$(4)
+         get image 15,0,0,200,20
+         sprite 15,0,275,15
+         cls
+         create bitmap 1,256,256
+         if Solo_nbCartes > 5
+         print Solo_CarteNom$(5)
+         get image 16,0,0,200,20
+         sprite 16,0,324,16
+         cls
+         endif
+         create bitmap 1,256,256
+         if Solo_nbCartes > 6
+         print Solo_CarteNom$(6)
+         get image 17,0,0,200,20
+         sprite 17,0,370,17
+         cls
+         endif
+         create bitmap 1,256,256
+         if Solo_nbCartes > 7
+         print Solo_CarteNom$(7)
+         get image 18,0,0,200,20
+         sprite 18,0,410,18
+         cls
+         endif
+         endif
+         delete bitmap 1
+         create bitmap 1,256,256
+         print Fraglimit
+         get image 14,0,0,30,30
+         sprite 14,990,485,14
+         cls
+         delete bitmap 1
+         create bitmap 1,256,256
+         print nbwarmachines
+         get image 19,0,0,30,30
+         sprite 19,995,271,19
+         cls
+         delete bitmap 1
+         create bitmap 1,256,256
+         print nbsentinelles
+         get image 20,0,0,30,30
+         sprite 20,995,335,20
+         cls
+         delete bitmap 1
+         create bitmap 1,256,256
+         print nballies
+         get image 21,0,0,30,30
+         sprite 21,995,435,21
+         cls
+         delete bitmap 1
+if boutton2(987,473,1012,487)=1 then inc Fraglimit
+if boutton2(987,508,1012,521)=1 then dec Fraglimit
+if boutton2(987,258,1012,272)=1 then inc nbwarmachines
+if boutton2(987,293,1012,306)=1 and nbwarmachines > 0 then dec nbwarmachines
+if boutton2(987,318,1012,332)=1 then inc nbsentinelles
+if boutton2(987,353,1012,366)=1 and nbsentinelles > 0 then dec nbsentinelles
+if boutton2(987,424,1012,437)=1 then inc nballies
+if boutton2(987,459,1012,471)=1 and nballies > 0 then dec nballies
+NbBot = nbwarmachines + nbsentinelles
+if mouseX() < 215
+      rem le boutton de menu principal
+      if mouseY() > 10 and mousey() < 45
+      if mouseclick()=1
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      for Partie_solo = 6 to 246 step 10
+      wait 0
+      dec Solo_arrive,10
+      sprite 4,-257+Solo_arrive,0,4
+      sprite 5,param(35)-512,-257+Solo_arrive,5
+      sprite 6,param(35)-Solo_arrive,param(36)-512,6
+      sprite 7,param(35)/2,param(36)-Solo_arrive,7
+      next Partie_solo
+      show sprite 1
+      show sprite 2
+      delete image 4
+      delete sprite 4
+      delete image 5
+      delete sprite 5
+      delete image 6
+      delete sprite 6
+      delete image 7
+      delete sprite 7
+
+      goto menu_base
+      endif
+      endif
+
+      rem les autres
+mosXMax = 135 : MosXmin = 100 : index = 0 : gosub elem_matchmort
+mosXMax = 265 : MosXmin = 217 : index = 3 : gosub elem_matchmort
+if mouseY() > 135 and mousey() < 175
+      if Solo_nbCartes > 1
+      Solo_carte_en_revue = 2
+      Nomcarte$ = Solo_CarteNom$(1)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      sprite 8,param(35)-480,0,8
+      set sprite 8,1,1
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+         if sprite exist (10) then delete sprite 10
+         if sprite exist (11) then delete sprite 11
+         if sprite exist (12) then delete sprite 12
+         if sprite exist (13) then delete sprite 13
+         if sprite exist (14) then delete sprite 14
+         if sprite exist (15) then delete sprite 15
+         if sprite exist (16) then delete sprite 16
+         if sprite exist (17) then delete sprite 17
+         if sprite exist (18) then delete sprite 18
+         if sprite exist (19) then delete sprite 19
+         if sprite exist (20) then delete sprite 20
+         if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 2
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 175 and mousey() < 217
+      if Solo_nbCartes > 2
+      Solo_carte_en_revue = 3
+      Nomcarte$ = Solo_CarteNom$(2)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      sprite 8,param(35)-480,0,8
+      set sprite 8,1,1
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 3
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 265 and mousey() < 314
+      if Solo_nbCartes > 4
+      Solo_carte_en_revue = 5
+      Nomcarte$ = Solo_CarteNom$(4)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      set sprite 8,1,1
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 4
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+
+
+      if mouseY() > 314 and mousey() < 360
+      if Solo_nbCartes > 5
+      Solo_carte_en_revue = 6
+      Nomcarte$ = Solo_CarteNom$(5)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      set sprite 8,1,1
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 5
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 360 and mousey() < 400
+      if Solo_nbCartes > 6
+      Solo_carte_en_revue = 7
+      Nomcarte$ = Solo_CarteNom$(6)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      set sprite 8,1,1
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 6
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 400 and mousey() < 445
+      if Solo_nbCartes > 7
+      Solo_carte_en_revue = 8
+      Nomcarte$ = Solo_CarteNom$(7)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      sprite 8,param(35)-480,0,8
+      set sprite 8,1,1
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      if sprite exist (10) then delete sprite 10
+      if sprite exist (11) then delete sprite 11
+      if sprite exist (12) then delete sprite 12
+      if sprite exist (13) then delete sprite 13
+      if sprite exist (14) then delete sprite 14
+      if sprite exist (15) then delete sprite 15
+      if sprite exist (16) then delete sprite 16
+      if sprite exist (17) then delete sprite 17
+      if sprite exist (18) then delete sprite 18
+      if sprite exist (19) then delete sprite 19
+      if sprite exist (20) then delete sprite 20
+      if sprite exist (21) then delete sprite 21
+      goto load_game
+      endif
+      else
+      if Solo_carte_en_revue = 7
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+else
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+endif
+
+loop
+
+elem_matchmort:
+
+      if mouseY() > mosXmin and mousey() < mosXmax
+
+         if Solo_nbCartes > index
+         Solo_carte_en_revue = index+1
+         Nomcarte$ = Solo_CarteNom$(index)
+         set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+         load image "preview.jpg",8,1
+         sprite 8,param(35)-480,0,8
+         set sprite 8,1,1
+         open to read 1,"descr.txt"
+         set text font "arial",1
+         set text size 14
+         create bitmap 1,256,256
+         for Solo_description_ligncount = 0 to 20
+         read string 1,Solo_Description_ligne1$
+         print Solo_Description_ligne1$
+         next Solo_description_ligncount
+         get image 9,0,0,256,256
+         cls
+         delete bitmap 1
+         close file 1
+         sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+         endif
+
+         if mouseclick() = 1
+         game_carte$=Nomcarte$
+         type_game$="Match_mort"
+         if sprite exist (8) then delete sprite 8
+         if sprite exist (9) then delete sprite 9
+         if sprite exist (10) then delete sprite 10
+         if sprite exist (11) then delete sprite 11
+         if sprite exist (12) then delete sprite 12
+         if sprite exist (13) then delete sprite 13
+         if sprite exist (14) then delete sprite 14
+         if sprite exist (15) then delete sprite 15
+         if sprite exist (16) then delete sprite 16
+         if sprite exist (17) then delete sprite 17
+         if sprite exist (18) then delete sprite 18
+         if sprite exist (19) then delete sprite 19
+         if sprite exist (20) then delete sprite 20
+         if sprite exist (21) then delete sprite 21
+         goto load_game
+         endif
+
+      else
+         if Solo_carte_en_revue = index
+         Solo_carte_en_revue = 0
+         if sprite exist (8) then delete sprite 8
+         if sprite exist (9) then delete sprite 9
+         endif
+      endif
+return

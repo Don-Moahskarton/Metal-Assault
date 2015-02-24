@@ -1,0 +1,416 @@
+rem Chargement de la configuration du jeu
+open to read 1,"metal Assault.ini"
+read string 1,CheminMA$
+read string 1,Configjoueur$
+close file 1
+dim param(60)
+set dir CheminMA$+"\configs\"+Configjoueur$
+load array "param.txt",param(60)
+dim Solo_CarteNom$(256)
+
+rem initialisation du Système
+set display mode param(35),param(36),param(37)
+cls
+make memblock 154,1 rem pour les DLLs
+hide mouse
+disable escapekey
+
+rem la musique
+set dir CheminMA$+"\musiques"
+load music "menu.mp3",1
+loop music 1
+
+rem l'intro
+set dir CheminMA$+"\anims"
+load animation "Intro.avi",1
+place animation 1,0,0,param(35),param(36)
+play animation 1
+set animation speed 1,125
+repeat
+until animation playing(1) = 0 or returnkey() = 1 or escapekey() = 1
+stop animation 1
+place animation 1,0,0,1,1
+delete animation 1
+
+rem chargement du menu
+set dir CheminMA$+"\anims"
+load animation "Menu.avi",1
+place animation 1,0,0,param(35),param(36)
+loop animation 1
+
+set dir CheminMA$+"\jpegs\menu"
+load image "Primaire.jpg",1,1
+sprite 1,0,param(36)-420,1
+set sprite 1,1,0
+
+rem création du tableau de coordonés bouttons
+dim coorbouttons(11,4,2)
+coorbouttons(1,1,1) = 50
+coorbouttons(1,1,2) = param(36)-370
+coorbouttons(1,2,1) = 230
+coorbouttons(1,2,2) = param(36)-370
+coorbouttons(1,3,1) = 50
+coorbouttons(1,3,2) = param(36)-335
+coorbouttons(1,4,1) = 230
+coorbouttons(1,4,2) = param(36)-335
+coorbouttons(2,1,1) = 50
+coorbouttons(2,1,2) = param(36)-305
+coorbouttons(2,2,1) = 230
+coorbouttons(2,2,2) = param(36)-305
+coorbouttons(2,3,1) = 50
+coorbouttons(2,3,2) = param(36)-265
+coorbouttons(2,4,1) = 230
+coorbouttons(2,4,2) = param(36)-265
+coorbouttons(3,1,1) = 50
+coorbouttons(3,1,2) = param(36)-240
+coorbouttons(3,2,1) = 230
+coorbouttons(3,2,2) = param(36)-240
+coorbouttons(3,3,1) = 50
+coorbouttons(3,3,2) = param(36)-190
+coorbouttons(3,4,1) = 230
+coorbouttons(3,4,2) = param(36)-190
+coorbouttons(4,1,1) = 50
+coorbouttons(4,1,2) = param(36)-170
+coorbouttons(4,2,1) = 230
+coorbouttons(4,2,2) = param(36)-170
+coorbouttons(4,3,1) = 50
+coorbouttons(4,3,2) = param(36)-130
+coorbouttons(4,4,1) = 230
+coorbouttons(4,4,2) = param(36)-130
+coorbouttons(5,1,1) = 50
+coorbouttons(5,1,2) = param(36)-105
+coorbouttons(5,2,1) = 230
+coorbouttons(5,2,2) = param(36)-105
+coorbouttons(5,3,1) = 50
+coorbouttons(5,3,2) = param(36)-65
+coorbouttons(5,4,1) = 230
+coorbouttons(5,4,2) = param(36)-65
+coorbouttons(6,1,1) = 275
+coorbouttons(6,1,2) = param(36)-352
+coorbouttons(6,2,1) = 430
+coorbouttons(6,2,2) = param(36)-352
+coorbouttons(6,3,1) = 275
+coorbouttons(6,3,2) = param(36)-312
+coorbouttons(6,4,1) = 430
+coorbouttons(6,4,2) = param(36)-312
+coorbouttons(7,1,1) = 275
+coorbouttons(7,1,2) = param(36)-312
+coorbouttons(7,2,1) = 430
+coorbouttons(7,2,2) = param(36)-312
+coorbouttons(7,3,1) = 275
+coorbouttons(7,3,2) = param(36)-257
+coorbouttons(7,4,1) = 430
+coorbouttons(7,4,2) = param(36)-257
+coorbouttons(8,1,1) = 275
+coorbouttons(8,1,2) = param(36)-257
+coorbouttons(8,2,1) = 430
+coorbouttons(8,2,2) = param(36)-257
+coorbouttons(8,3,1) = 275
+coorbouttons(8,3,2) = param(36)-217
+coorbouttons(8,4,1) = 430
+coorbouttons(8,4,2) = param(36)-217
+coorbouttons(9,1,1) = 275
+coorbouttons(9,1,2) = param(36)-217
+coorbouttons(9,2,1) = 430
+coorbouttons(9,2,2) = param(36)-217
+coorbouttons(9,3,1) = 275
+coorbouttons(9,3,2) = param(36)-167
+coorbouttons(9,4,1) = 430
+coorbouttons(9,4,2) = param(36)-167
+coorbouttons(10,1,1) = 275
+coorbouttons(10,1,2) = param(36)-167
+coorbouttons(10,2,1) = 430
+coorbouttons(10,2,2) = param(36)-167
+coorbouttons(10,3,1) = 275
+coorbouttons(10,3,2) = param(36)-117
+coorbouttons(10,4,1) = 430
+coorbouttons(10,4,2) = param(36)-117
+coorbouttons(11,1,1) = 275
+coorbouttons(11,1,2) = param(36)-117
+coorbouttons(11,2,1) = 430
+coorbouttons(11,2,2) = param(36)-117
+coorbouttons(11,3,1) = 275
+coorbouttons(11,3,2) = param(36)-61
+coorbouttons(11,4,1) = 430
+coorbouttons(11,4,2) = param(36)-61
+rem ouverture du menu a l'utilisateur
+show mouse
+disable escapekey
+
+rem et boucle du menu (avec chargement des images en temp  réel)
+menu_base:
+do
+gosub menuaux_arivee
+if mouseclick() = 1
+if mousex()>50 and mousex()<230
+if mousey()> coorbouttons(1,1,2) and mousey() < coorbouttons(1,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 1 then delete image 2
+load image "soloaux.jpg",2,1
+menuaux_image = 2
+menu_id = 1
+endif
+if mousey()> coorbouttons(2,1,2) and mousey() < coorbouttons(2,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 2 then delete image 2
+load image "multiaux.jpg",2,1
+menuaux_image = 2
+menu_id = 2
+endif
+if mousey()> coorbouttons(3,1,2) and mousey() < coorbouttons(3,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 3 then delete image 2
+load image "netaux.jpg",2,1
+menuaux_image = 2
+menu_id = 3
+endif
+if mousey()> coorbouttons(4,1,2) and mousey() < coorbouttons(4,3,2)
+set dir CheminMA$+"\jpegs\menu"
+if menu_id not 4 then delete image 2
+load image "configaux.jpg",2,1
+menuaux_image = 2
+menu_id = 4
+endif
+if mousey()> coorbouttons(5,1,2) and mousey() < coorbouttons(5,3,2)
+end
+endif
+endif
+endif
+goto menu_aux
+loop
+
+rem les sous menus
+menu_aux:
+if mouseclick() = 1
+if mouseX()>275 and mouseX()<430
+if mousey()> coorbouttons(6,1,2) and mousey() < coorbouttons(6,3,2) and mouseclick() = 1
+if menu_id = 4 then goto Config
+gosub beta
+endif
+if mousey()> coorbouttons(7,1,2) and mousey() < coorbouttons(7,3,2) and mouseclick() = 1
+if menu_id = 1 then goto matchamort
+gosub beta
+endif
+if mousey()> coorbouttons(8,1,2) and mousey() < coorbouttons(8,3,2) and mouseclick() = 1
+gosub beta
+endif
+if mousey()> coorbouttons(9,1,2) and mousey() < coorbouttons(9,3,2) and mouseclick() = 1
+if menu_id = 4 then goto Credits
+gosub beta
+endif
+if mousey()> coorbouttons(10,1,2) and mousey() < coorbouttons(10,3,2) and mouseclick() = 1
+gosub beta
+endif
+if mousey()> coorbouttons(11,1,2) and mousey() < coorbouttons(11,3,2) and mouseclick() = 1
+gosub beta
+endif
+endif
+endif
+goto menu_base
+
+
+rem le match a mort
+matchamort:
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+load image "Solo_select.jpg",4,1
+sprite 4,-257,0,4
+load image "Solo_preview.jpg",5,1
+sprite 5,param(35)-512,-257,5
+load image "Solo_Brefing.jpg",6,1
+sprite 6,param(35),param(36)-512,6
+load image "Solo_Descrition.jpg",7,1
+sprite 7,param(35)/2,param(36),7
+
+Solo_arrive = 0
+for Partie_solo = 6 to 246 step 10
+wait 0
+inc Solo_arrive,10
+sprite 4,-257+Solo_arrive,0,4
+sprite 5,param(35)-512,-257+Solo_arrive,5
+sprite 6,param(35)-Solo_arrive,param(36)-512,6
+sprite 7,param(35)/2,param(36)-Solo_arrive,7
+next Partie_solo
+set dir CheminMA$+"\Cartes\Match_Mort"
+open to read 1,"index.ini"
+read float 1,Solo_nbCartes#
+Solo_nbCartes = int(Solo_nbCartes#)
+if Solo_nbCartes = 0 then exit prompt "Il n'y a aucune carte dans le jeu !","Metal assault Erreur" : end
+for Carteliste_solo = 0 to Solo_nbCartes
+read string 1,Solo_CarteNom$(Carteliste_solo)
+next Carteliste_solo
+close file 1
+do
+if mouseX() < 215
+      if mouseY() > 10 and mousey() < 45
+      if mouseclick()=1
+      for Partie_solo = 6 to 246 step 10
+      wait 0
+      dec Solo_arrive,10
+      sprite 4,-257+Solo_arrive,0,4
+      sprite 5,param(35)-512,-257+Solo_arrive,5
+      sprite 6,param(35)-Solo_arrive,param(36)-512,6
+      sprite 7,param(35)/2,param(36)-Solo_arrive,7
+      next Partie_solo
+      show sprite 1
+      show sprite 2
+      delete image 4
+      delete sprite 4
+      delete image 5
+      delete sprite 5
+      delete image 6
+      delete sprite 6
+      delete image 7
+      delete sprite 7
+      goto menu_base
+      endif
+      endif
+
+      if mouseY() > 100 and mousey() < 135
+      if Solo_nbCartes > 0
+      Solo_carte_en_revue = 1
+      Nomcarte$ = Solo_CarteNom$(0)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8,1
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      if mouseclick() = 1
+      game_carte$=Nomcarte$
+      type_game$="Match_mort"
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+
+      goto game
+      endif
+      else
+      if Solo_carte_en_revue = 1
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 135 and mousey() < 175
+      if Solo_nbCartes > 1
+      Nomcarte$ = Solo_CarteNom$(1)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      else
+      if Solo_carte_en_revue = 2
+      Solo_carte_en_revue = 1
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+
+      if mouseY() > 175 and mousey() < 217
+      if Solo_nbCartes > 2
+      Nomcarte$ = Solo_CarteNom$(1)
+      set dir CheminMA$+"\Cartes\Match_Mort\"+Nomcarte$
+      load image "preview.jpg",8
+      sprite 8,param(35)-480,0,8
+      open to read 1,"descr.txt"
+      set text font "arial",1
+      set text size 14
+      create bitmap 1,256,256
+      for Solo_description_ligncount = 0 to 20
+      read string 1,Solo_Description_ligne1$
+      print Solo_Description_ligne1$
+      next Solo_description_ligncount
+      get image 9,0,0,256,256
+      cls
+      delete bitmap 1
+      close file 1
+      sprite 9,(param(35)/2)+20,param(36)-(Solo_arrive-30),9
+      endif
+      else
+      if Solo_carte_en_revue = 2
+      Solo_carte_en_revue = 0
+      if sprite exist (8) then delete sprite 8
+      if sprite exist (9) then delete sprite 9
+      endif
+      endif
+else
+if sprite exist (8) then delete sprite 8
+if sprite exist (9) then delete sprite 9
+endif
+loop
+
+
+Credits:
+set dir CheminMA$+"\anims"
+load animation "Credit.avi",1
+place animation 1,0,0,param(35),param(36)
+play animation 1
+set animation speed 1,100
+hide sprite 1
+hide sprite 2
+repeat
+until animation playing(1) = 0 or returnkey() = 1 or escapekey() = 1
+stop animation 1
+place animation 1,0,0,1,1
+delete animation 1
+
+show sprite 1
+show sprite 2
+set dir CheminMA$+"\anims"
+load animation "Menu.avi",1
+place animation 1,0,0,param(35),param(36)
+loop animation 1
+goto menu_base
+
+rem les fontions du menu
+end
+menuaux_arivee:
+if menuaux_image=0 then return
+sprite 2,215,param(36)-arrive,menuaux_image
+inc arrive,40
+if arrive > 400 then menuaux_image = 0 :arrive = 0
+return
+
+beta:
+set dir CheminMA$+"\jpegs\menu"
+load image "beta.jpg",3,1
+sprite 3,364,364,3
+do
+if mouseclick() = 1
+if mouseX() > 46+364 and mouseX() < 195+364
+if mouseY() > 98+364 and mouseY() < 127+364
+delete image 3
+delete sprite 3
+exit
+endif
+endif
+endif
+loop
+wait 200
+return

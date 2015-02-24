@@ -1,0 +1,23 @@
+if file exist("dom.ini") then delete file "dom.ini"
+open to write 1,"dom.ini"
+pts# = 4
+write float 1,pts#
+
+write file 1,873
+write file 1,100
+write file 1,873
+
+write file 1,-873
+write file 1,100
+write file 1,873
+
+write file 1,873
+write file 1,100
+write file 1,-873
+
+write file 1,-873
+write file 1,100
+write file 1,-873
+
+close file 1
+end

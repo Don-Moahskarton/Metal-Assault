@@ -1,0 +1,56 @@
+Rem *** Include File: Game_aux.dba ***
+Rem Created: 29/03/2008 10:24:35
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+dam_warn:
+if dam_warn > 1
+show sprite 18
+sprite 18,0,0,18
+set sprite alpha 18,dam_warn
+dec dam_warn,10
+if dam_warn <= 1 then hide sprite 18
+endif
+return
+
+skyfrag:
+if sc_spherecast(5,oldx3#,oldy3#,oldz3#,x4#,y4#,z4#,radius#,0) and script_found  =1
+vie = 0
+endif
+return
+
+
+rotate_sky:
+if rotate_sky_x = 1 then xrotate object 5,temporel*sky_speed
+if rotate_sky_y = 1 then yrotate object 5,temporel*sky_speed
+if rotate_sky_z = 1 then zrotate object 5,temporel*sky_speed
+return
+
+Reaprovisionement_Muns:
+if object exist(1257) =1
+if distance(3,1257) < 150 and reapp_etat = 0 and Player_stats(0) >= (listarme(game_arme_coress(arme)-1000).price)/100
+reapp_etat = 1
+inc listarme(game_arme_coress(arme)-1000).bulets_Stock,5
+dec Player_stats(0),(listarme(game_arme_coress(arme)-1000).price)/10
+else
+reapp_etat = 0
+endif
+endif
+return
+
+
+rentree_goliath:
+for t = 0 to nb_goliath-1
+if object exist(t+1281) =1
+if distance(3,t+1281) < 150 and keystate(18) = 1
+do
+if keystate(18) =  0 then exit
+loop
+exclude object on game_arme_coress(arme)
+gameplay_Type = 2
+Dans_le_goliath_le_joueur_est = 1
+Goliath_number = 1281+t
+endif
+endif
+next t
+return
+

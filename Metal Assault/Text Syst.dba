@@ -1,0 +1,19 @@
+Rem *** Include File: Text Syst.dba ***
+Rem Created: 05/06/2008 21:39:25
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+
+Sytext:
+if oldtextpricipal$ = textpricipal$
+else
+set dir CheminMA$
+
+Text_pricipal_ temp = 255
+endif
+oldtextpricipal$ = textpricipal$
+set sprite alpha 24,Text_pricipal_ temp
+dec Text_pricipal_ temp
+sprite 24,param(35)/2,(param(36)/2)-200,24
+offset sprite 24,sprite width(24)/2,sprite height(24)/2
+return

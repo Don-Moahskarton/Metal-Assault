@@ -1,0 +1,246 @@
+Rem *** Include File: Admin.dba ***
+Rem Created: 03/01/2008 14:17:05
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+admin:
+
+OLDvie  = vie
+if sound exist(3) = 1
+if sound playing(3) = 0 then delete sound 3
+endif
+rem ========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ========================================================================================================================
+rem le respawn du droide
+
+if drespawn >= 1 and VieD = -100000000
+dec drespawn
+if drespawn = 1
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_droide_nb-1)+1
+dx# = game_repawn(2,Game_resppawn_point,1)
+dz# = game_repawn(2,Game_resppawn_point,3)
+dy# = game_repawn(2,Game_resppawn_point,2)
+endif
+position object 5000,dX#,dY#,dZ#
+if nbsentinelles = 1 then position object 5001,dx#,dy#+120+solo_model_St*60,dz# : sc_updateobject 5001
+exclude object off 5000
+VieD = 100 - nbwarmachines*60
+endif
+endif
+rem ========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ========================================================================================================================
+rem le match a mort
+if VieD <= 0
+if VieD = -100000000
+else
+New_txt(1,"Vous avez cassé " + nombot$,26,0,0,255,screen width()/2,screen height()/2-50,256,256)
+rand = rnd(10)
+select rand
+case 0
+game_console_txtametr$ = Configjoueur$+" a cassé " + nombot$
+endcase
+case 1
+game_console_txtametr$ = Configjoueur$+" a étalé " + nombot$
+endcase
+case 2
+game_console_txtametr$ = Configjoueur$+" a fait un trou dans " + nombot$
+endcase
+case 3
+game_console_txtametr$ = nombot$ + " est en pieces détachés a cause de "+Configjoueur$
+endcase
+case 4
+game_console_txtametr$ = Configjoueur$+" est devenu plieur de tôles"
+endcase
+case 5
+game_console_txtametr$ = nombot$ + " n'existe plus"
+endcase
+case 6
+game_console_txtametr$ = Configjoueur$+" a perforé " + nombot$
+endcase
+case 7
+game_console_txtametr$ = nombot$ + " a été court-circuité"
+endcase
+case 8
+game_console_txtametr$ = nombot$ + " a désormais de quoi jongler"
+endcase
+case 9
+game_console_txtametr$ = Configjoueur$+" a fragué"
+endcase
+case 10
+game_console_txtametr$ = Configjoueur$+" est intervenu"
+endcase
+endselect
+inc Frag
+Player_stats(0) = Player_stats(0) + (200+ nbsentinelles*1000)
+position object 1001,dX#,dY#-tailleperso#+ nbwarmachines*60,dZ#
+point object 1001,X#,dY#-tailleperso#+ nbwarmachines*60,Z#
+rotate object 1001,object angle X(1001),object angle Y(1001)+180,object angle Z(1001)
+exclude object off 1001
+play object 1001
+exclude object on 5000
+position object 5000,9999999,99999999,99999999
+sc_updateobject 5000
+VieD = -100000000
+drespawn = 100
+
+if sound exist(3) = 1
+ delete sound 3
+endif
+set dir CheminMA$+"\Sounds\Voix\Humain\"
+load sound game_frag_human_sound$(rnd(game_frag_human_sound_nb-1)+1),3
+play sound 3
+endif
+endif
+rem ========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ========================================================================================================================
+
+
+
+
+if Vie <= 0
+rand = rnd(10)
+New_txt(1,"Vous avez été tué par " + nombot$,26,255,0,0,screen width()/2,screen height()/2-50,256,256)
+select rand
+case 0
+game_console_txtametr$ = nombot$ + " est devenu efficace, il a tué "+Configjoueur$
+endcase
+case 1
+game_console_txtametr$ = nombot$ + " a démontré sa perfection"
+endcase
+case 2
+game_console_txtametr$ = Configjoueur$+" a été saigné"
+endcase
+case 3
+game_console_txtametr$ = Configjoueur$+" a été assaciné"
+endcase
+case 4
+game_console_txtametr$ = "On dirait que " + nombot$ + " a été débugué"
+endcase
+case 5
+game_console_txtametr$ = nombot$ + " a recu un patch"
+endcase
+case 6
+game_console_txtametr$ = "Un point de plus pour " + nombot$
+endcase
+case 7
+game_console_txtametr$ = "Le fusil de " + nombot$ + " fonctionne"
+endcase
+case 8
+game_console_txtametr$ = Configjoueur$+" s'est fait mathématiquement éradiquer"
+endcase
+case 9
+game_console_txtametr$ = Configjoueur$+" ne se réveillera plus"
+endcase
+case 10
+game_console_txtametr$ = Configjoueur$ +" n'avais pas vus " + nombot$
+endcase
+endselect
+
+if sound exist(3) = 1 then delete sound 3
+set dir CheminMA$+"\Sounds\Voix\Droides\"
+load sound game_frag_Droide_sound$(rnd(game_frag_Droide_sound_nb-1)+1),3
+play sound 3
+inc mort
+Player_stats(0) = Player_stats(0) -(200+ nbsentinelles*1000)
+gosub Etat_Mort
+coef_ralentissement_2# = 1.0
+Vie = 100
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+x# = game_repawn(1,Game_resppawn_point,1)
+z# = game_repawn(1,Game_resppawn_point,3)
+y# = game_repawn(1,Game_resppawn_point,2)
+endif
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+endif
+rem ===========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ===========================================================================================================================
+
+
+
+
+
+if Frag > Fraglimit-1 or Mort > Fraglimit-1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+if escapekey() = 1
+wait key
+if escapekey() = 1
+delete object 1
+delete object 2
+delete object 3
+delete object 4
+delete object 5
+delete object 6
+delete object 7
+delete object 8
+delete object 9
+delete object 10
+temp  = game_arme_coress(arme)
+delete object temp
+delete object 12
+delete sound 1
+delete sound 2
+delete music 1
+delete image 15
+delete image 10
+delete sprite 15
+Set Camera To Image 0, 1, 1024,768
+goto debut
+else
+goto game
+endif
+endif
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "Scores.jpg",18
+do
+sprite 18,0,0,18
+set sprite alpha 18,100
+set cursor 70,63
+print Configjoueur$
+set cursor 455,63
+print Frag
+set cursor 650,63
+print mort
+set cursor 865,63
+print Frag-mort
+set cursor 70,83
+print nombot$
+set cursor 455,83
+print mort
+set cursor 650,83
+print Frag
+set cursor 865,83
+print mort-Frag
+if mort > 0
+if Frag > Mort
+center text param(35)/2,param(36)/2+50,"Vous avez Gagné"
+else
+center text param(35)/2,param(36)/2+50,"Vous avez Perdu"
+endif
+else
+center text param(35)/2,param(36)/2+50,"Carnage parfait"
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+endif
+center text 500,420,gagnant$
+loop
+endif
+return
+
+

@@ -1,0 +1,7 @@
+if file exist("Index.ini") then delete file "Index.ini"
+open to write 1,"Index.ini"
+cartes# = 1
+write float 1,Cartes#
+write string 1,"Montagnard"
+close file 1
+end

@@ -1,0 +1,839 @@
+Rem *** Include File: Armes.dba ***
+Rem Created: 31/12/2007 17:42:44
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+armes:
+rem  on dit si l'arme peut tirer
+if mouseclick() =1 and time+1000<timer()
+Game_tir_possible =1
+Game_DCA_tir_possible = 1
+else
+Game_tir_possible =0
+Game_DCA_tir_possible = 0
+endif
+if mouseclick() =1 and time+100<timer()
+Game_minigun_tir_possible =1
+else
+Game_minigun_tir_possible =0
+endif
+if object playing(game_arme_coress(arme)) = 0
+temp = game_arme_coress(arme)
+select temp
+case 1030
+loop object game_arme_coress(arme),0,30
+endcase
+case default
+loop object game_arme_coress(arme),0,20
+endcase
+endselect
+endif
+if mouseclick() =1 and time+17<timer()
+Game_Famas_tir_possible =1
+else
+Game_Famas_tir_possible =0
+endif
+if mouseclick() =1 and time+200<timer()
+Game_m81_tir_possible =1
+Game_acog_tir_possible =1
+else
+Game_m81_tir_possible =0
+Game_acog_tir_possible =0
+endif
+if mouseclick() =1 and time+25<timer()
+Game_ak74_tir_possible =1
+else
+Game_ak74_tir_possible =0
+endif
+
+
+rem on s'occupe des roquettes
+if LRmode = 0
+temp = 0
+for t = 1100 to 1159
+inc temp
+if Game_roket_life(temp) > 0
+move object t+1,Extrapolation*4
+Game_roket_life(temp) = Game_roket_life(temp)-1
+sc_updateobject t+1
+collide  = sc_groupCollision(t+1,2)
+if collide > 0 and VieD > 0
+Xrottemp# = object angle X(5000)
+Yrottemp# = object angle Y(5000)
+zrottemp# = object angle Z(5000)
+set object to object orientation 5000,t+1
+move object 5000,50
+rotate object 5000,Xrottemp#,Yrottemp#,Zrottemp#
+sc_updateobject 5000
+if t <= 30 then dec vied, rnd(150) : play sound 4
+if t > 30 then dec vied, rnd(50) : play sound 4
+endif
+endif
+next t
+endif
+if LRmode = 1
+temp = 0
+for t = 1100 to 1159
+inc temp
+if Game_roket_life(temp) > 0
+point object t+1,object position X(5000),object position Y(5000),object position Z(5000)
+move object t+1,Extrapolation*4
+Game_roket_life(temp) = Game_roket_life(temp)-1
+sc_updateobject t+1
+collide  = sc_groupCollision(t+1,2)
+if collide > 0 and VieD > 0
+Xrottemp# = object angle X(5000)
+Yrottemp# = object angle Y(5000)
+zrottemp# = object angle Z(5000)
+set object to object orientation 5000,t+1
+move object 5000,50
+rotate object 5000,Xrottemp#,Yrottemp#,Zrottemp#
+sc_updateobject 5000
+    dec vied, rnd(50) : play sound 4
+endif
+endif
+next t
+endif
+if game_arme_coress(arme)  = 1060 and mouseclick() =1 then inc game_Lr_chargement
+
+rem on s'occupe des balles du DCA
+for t= 0 to 9
+if Game_DCA_ballife(t)>0
+move object t+1161,60
+sc_updateobject t+1161
+Game_DCA_ballife(t) = Game_DCA_ballife(t)-1
+DCAcollide = SC_objectcollision(t+1161,5000) + SC_objectcollision(t+1161,1)*4
+if DCAcollide >= 1 then Game_DCA_ballife(t) = 0 : hide object t+1161
+if DCAcollide = 1 then play sound 4 : dec vied,rnd(50)
+endif
+if Game_DCA_ballife(t)<=0 then hide object t+1161
+next t
+
+
+rem on s'occupe des balles du goliath
+t= 8000
+for t= 8000 to 8000+Goliath_nb_bal-32
+if Goliath_bal_life(t-8000) <= 0 then  hide object t+1 : position object t+1,0,90000000,0
+if Goliath_bal_life(t-8000) > 0
+   move object t+1,30
+   sc_updateobject t+1
+   dec Goliath_bal_life(t-8000)
+    Gholiath_collide = sc_objectcollision(t+1,5000)
+   if Gholiath_collide > 0 then dec VieD,rnd(50) : Goliath_bal_life(t-8000) = 0
+   else
+   position object t+1,0,90000000,0
+   sc_updateobject t+1
+   hide object t+1
+   endif
+next t
+
+
+rem =============================================== changement d'arme =========================================================
+rem ==========================================================================================================================
+if Dans_le_goliath_le_joueur_est = 0
+
+oldmousZ# = mousZ#
+mousZ# = mousZ# + mousemoveZ()
+if oldmousZ#-mousZ# = 0
+else
+oldarme = arme
+exclude object on game_arme_coress(arme)
+for t = 1400 to 1700
+if object exist(t) = 1 then position object t,0,90000000,0
+next t
+   if oldmousZ#-mousZ# > 0
+      inc arme
+      if arme > nb_arme then arme = 0
+      exclude object off game_arme_coress(arme)
+   endif
+
+   if oldmousZ#-mousZ# < 0
+      dec arme
+      if arme < 0 then arme = nb_arme-1
+      exclude object off game_arme_coress(arme)
+   endif
+exclude object off game_arme_coress(arme)
+   if zoom not 60 then dessomee = 1 : zoom = 60 :set camera fov zoom : hide sprite 14: exclude object off arme
+endif
+if arme > nb_arme-1 then arme = 0
+if arme < 0 then arme = nb_arme-1
+
+
+temp = game_arme_coress(arme)
+select temp
+
+Rem ================================================= Fusil de précision ====================================================
+rem =========================================================================================================================
+
+   case 1070
+   set cursor param(35)-256,param(36)-60
+   print "Classical Sniper Rifle"
+   set cursor param(35)-256,param(36)-30
+   print "Equipé d'une lunette 3-9.50"
+   if CsniperR_Silencieux > 0
+   position object CsniperR_Silencieux,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object CsniperR_Silencieux,camy#+270,camx#,0
+   endif
+   rem tir
+   if mouseclick() = 1 and Game_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   stop object game_arme_coress(arme)
+   Rand = rnd(1)
+   select rand
+   case 1
+   play object game_arme_coress(arme),25,30
+   if CsniperR_Silencieux > 0 then play object CsniperR_Silencieux,25,30
+   endcase
+   case 0
+   play object game_arme_coress(arme),45,50
+   if CsniperR_Silencieux > 0 then play object CsniperR_Silencieux,45,50
+   endcase
+   endselect
+   if CsniperR_Silencieux = 0
+   play sound 1070
+   else
+   play sound CsniperR_Silencieux
+   endif
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+   rem zoom
+   if mouseclick() = 2 and zoom = 60 and zoom_encour = 0  and dessomee = 1
+   zoom = 59
+   zoom_encour = 1
+   sprite 14,1,1,14
+   show sprite 14
+   exclude object on game_arme_coress(arme)
+   if CsniperR_Silencieux > 0 then exclude object on CsniperR_Silencieux
+   set camera fov zoom
+   endif
+
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 1
+   dec zoom,5
+   if zoom < 10 then zoom = 10
+   set camera fov zoom
+   endif
+
+   if mouseclick() = 0 and zoom < 60 and zoom_encour = 1 then zoom_encour = 0 : desoomee = 1
+
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 0 and desoomee = 1
+   inc zoom,30
+   if zoom > 60
+      zoom = 60
+      hide sprite 14
+      exclude object off game_arme_coress(arme)
+      if CsniperR_Silencieux > 0 then exclude object off CsniperR_Silencieux
+   endif
+   if zoom = 60
+      hide sprite 14
+      exclude object off game_arme_coress(arme)
+      if CsniperR_Silencieux > 0 then exclude object off CsniperR_Silencieux
+   endif
+   set camera fov zoom
+   dessomee = 0
+   endif
+
+   if mouseclick() = 0 and dessomee = 0 then dessomee = 1
+
+   endcase
+
+Rem ================================================= Double Lance-roquette =================================================
+rem =========================================================================================================================
+
+   case 1060
+   set cursor param(35)-256,param(36)-100
+   print "Double Lance Roquettes"
+   set cursor param(35)-256,param(36)-60
+   print "(deux Superbazookas assemblés)"
+   if mouseclick() =0 then game_Lr_chargementOLD = game_Lr_chargement : game_roket_dejatire = 0
+   if Game_roket_select > 1129 then Game_roket_select = 1102
+   if Game_biroket_select > 1159 then Game_biroket_select = 1132
+   if Game_roket_life(Game_roket_select-1100) < 0 then dec Game_roket_select
+   if Game_roket_life(Game_biroket_select-1100) < 0 then dec Game_biroket_select
+
+   if  game_Lr_chargement = game_Lr_chargementOLD and game_Lr_chargementOLD > 0 and time+1000<timer() and  game_roket_dejatire = 0 and  game_Lr_chargement > 10 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour,
+   time = timer()
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),45,50
+   play sound 1060
+   exclude object off Game_biroket_select
+   loop object Game_biroket_select,0,20
+   rotate object Game_biroket_select,camera angle X(),camera angle y(),camera angle z()
+   position object Game_biroket_select,camera position X(),camera position y(),camera position z()
+   Game_roket_life(Game_biroket_select-1100) = 1000
+   inc Game_biroket_select
+   game_Lr_chargement = 0
+   game_roket_dejatire = 1
+   endif
+
+   if game_Lr_chargement = game_Lr_chargementOLD and game_Lr_chargementOLD > 0 and time+1000<timer() and  game_roket_dejatire = 0 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),25,30
+   play sound 1060
+   exclude object off Game_roket_select
+   rotate object Game_roket_select,camera angle X(),camera angle y(),camera angle z()
+   position object Game_roket_select,camera position X(),camera position y(),camera position z()
+   Game_roket_life(Game_roket_select-1100) = 1000
+   inc Game_roket_select
+   game_Lr_chargement = 0
+   game_roket_dejatire = 1
+   endif
+
+   if mouseclick() =2
+   if mouseclick() = 2 and LRmode = 0 then LRmode = 1 : goto Game_lr_suite
+   if mouseclick() = 2 and LRmode = 1 then LRmode = 0
+   Game_lr_suite:
+   do
+   if mouseclick() = 0 then exit
+   loop
+   endif
+
+   endcase
+
+Rem ================================================= Minigun ===============================================================
+rem =========================================================================================================================
+
+   case 1050
+   set cursor param(35)-256,param(36)-100
+   print "Double Minigun"
+   set cursor param(35)-256,param(36)-60
+   print "(deux M61 Soudés ensembles)"
+   if mouseclick() = 1 and Game_minigun_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   play sound 1050
+   play object game_arme_coress(arme),50,100
+   rotate camera camera angle X()+rnd(4)-2,camera angle Y()+rnd(4)-2,camera angle Z()
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+   endcase
+
+rem ====================================================== DCA ===============================================================
+rem =========================================================================================================================
+
+   case 1030
+   set cursor param(35)-256,param(36)-100
+   print "Canon DCA"
+   set cursor param(35)-256,param(36)-60
+   print "Défence Anti-Automates"
+   if mouseclick() = 1 and Game_DCA_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),0,100
+   play sound 1030
+   break
+   for t = 1161 to 1170
+   position object t,camera position x(),camera position y()-genouperso#,camera position z()
+   rotate object t,camera angle x()+rnd(10)-5,camera angle y()+rnd(10)-5,camera angle z()+rnd(10)-5
+   show object t
+   Game_DCA_ballife(t-1161)=1000
+   next t
+   endif
+   endcase
+rem ====================================================== Famas ===============================================================
+rem =========================================================================================================================
+
+   case 1040
+   set cursor param(35)-256,param(36)-100
+   print "Famas G2 Lourd"
+   set cursor param(35)-500,param(36)-60
+   print "Fusil d'Assaut de la Manufacture d'Armes de Saint-Étienne"
+   if Famas_Vlourd > 1
+   position object Famas_Vlourd,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Famas_Vlourd,camy#+270,camx#,0
+   endif
+   if Famas_acog > 1
+   position object Famas_acog,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Famas_acog,camy#+270,camx#,0
+   endif
+   if Famas_lazer > 1
+   position object Famas_lazer,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Famas_lazer,camy#+270,camx#,0
+   endif
+   if Famas_Silencieux > 1
+   position object Famas_Silencieux,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Famas_Silencieux,camy#+270,camx#,0
+   endif
+
+   if mouseclick() = 1 and Game_Famas_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0 and zoom = 60
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   if Famas_Silencieux = 0
+   play sound 1040
+   else
+   play sound Famas_Silencieux
+   endif
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,55
+   if zoom = 60
+   rotate camera camera angle X()+rnd(4)-2,camera angle Y()+rnd(4)-2,camera angle Z()
+   endif
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+   if mouseclick() = 3 and Game_Famas_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   if Famas_Silencieux = 0
+   play sound 1040
+   else
+   play sound Famas_Silencieux
+   endif
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,55
+   if zoom = 60
+   rotate camera camera angle X()+rnd(4)-2,camera angle Y()+rnd(4)-2,camera angle Z()
+   endif
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+
+   if mouseclick() = 1 and Game_acog_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0 and zoom < 60
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   if Famas_Silencieux = 0
+   play sound 1040
+   else
+   play sound Famas_Silencieux
+   endif
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,55
+   if zoom = 60
+   rotate camera camera angle X()+rnd(0.5)-0.25,camera angle Y()+rnd(0.5)-0.25,camera angle Z()
+   endif
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+
+   rem zoom
+   if Famas_acog > 1
+   if mouseclick() = 2 and zoom = 60 and zoom_encour = 0  and dessomee = 1
+   zoom = 59
+   zoom_encour = 1
+   sprite 14,1,1,20
+   show sprite 14
+   hide sprite 15
+   exclude object on game_arme_coress(arme)
+   if Famas_Silencieux > 0 then exclude object on Famas_Silencieux
+   set camera fov zoom
+   endif
+
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 1
+   dec zoom,5
+   if zoom < 10 then zoom = 10
+   set camera fov zoom
+   endif
+
+   if mouseclick() = 0 and zoom < 60 and zoom_encour = 1 then zoom_encour = 0 : desoomee = 1
+
+   if mouseclick() = 2 and zoom < 60 and zoom_encour = 0 and desoomee = 1
+   inc zoom,30
+   if zoom > 60
+      zoom = 60
+      hide sprite 14
+      show sprite 15
+      exclude object off game_arme_coress(arme)
+      if Famas_Silencieux > 0 then exclude object off Famas_Silencieux
+   endif
+   if zoom = 60
+      hide sprite 14
+      show sprite 15
+      exclude object off game_arme_coress(arme)
+      if Famas_Silencieux > 0 then exclude object off Famas_Silencieux
+   endif
+   set camera fov zoom
+   dessomee = 0
+   endif
+
+   if mouseclick() = 0 and dessomee = 0 then dessomee = 1
+   endif
+
+if mouseclick() = 2
+   oldfamasmire = Famas_mire
+   Famas_mire = 1
+   sprite 14,1,1,21
+   show sprite 14
+   hide sprite 15
+   exclude object on game_arme_coress(arme)
+   if Famas_Silencieux > 0 then exclude object on Famas_Silencieux
+   if Famas_Vlourd > 0 then exclude object on Famas_Vlourd
+   if Famas_lazer > 0 then exclude object on Famas_lazer
+   Joueur_immobile = 1
+   if Famas_Lazer > 1
+   Game_lazer_visible = 1
+   endif
+   endif
+   if mouseclick() = 1
+   oldFamasmire = Famas_mire
+   Famas_mire = 0
+   hide sprite 14
+   show sprite 15
+   Joueur_immobile = 0
+   Game_lazer_visible = 0
+   endif
+   if mouseclick() = 0
+   oldFamasmire = Famas_mire
+   Famas_mire = 0
+   hide sprite 14
+   show sprite 15
+   Joueur_immobile = 0
+   Game_lazer_visible = 0
+   endif
+   if oldfamasmire = 1 and famas_mire = 0
+   exclude object off game_arme_coress(arme)
+   if Famas_Silencieux > 0 then exclude object off Famas_Silencieux
+   if Famas_Vlourd > 0 then exclude object off Famas_Vlourd
+   if Famas_lazer > 0 then exclude object off Famas_lazer
+   Joueur_immobile = 0
+   endif
+
+   endcase
+
+Rem ================================================= M81 mini ===============================================================
+rem =========================================================================================================================
+
+   case 1051
+   set cursor param(35)-256,param(36)-100
+   print "M81 mini"
+   set cursor param(35)-256,param(36)-60
+   print "(M61 trafiqué et allégé)"
+   if mouseclick() = 1 and Game_m81_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   play sound 1051
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,100
+   rotate camera camera angle X()+rnd(4)-2,camera angle Y()+rnd(4)-2,camera angle Z()
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+   endcase
+
+Rem ================================================= AK 74 ===============================================================
+rem =========================================================================================================================
+
+   case 1041
+   set cursor param(35)-256,param(36)-100
+   print "AK-74"
+   set cursor param(35)-300,param(36)-60
+   print "Avtomat Kalachnikova modèle 1974"
+   rem si on a un silencieux
+   if Ak_74_Silencieux > 0
+   set cursor param(35)-300,param(36)-40
+   print "Et en plus elle est munie d'un silencieux, a l'assault !"
+   position object Ak_74_Silencieux,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Ak_74_Silencieux,camy#+270,camx#,0
+   endif
+
+
+   if mouseclick() = 1 and Game_ak74_tir_possible =1 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   if Ak_74_Silencieux = 0
+   play sound 1041
+   else
+   play sound Ak_74_Silencieux
+   endif
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,55
+   rotate camera camera angle X()+rnd(4)-2,camera angle Y()+rnd(4)-2,camera angle Z()
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+   if mouseclick() = 3 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   time = timer()
+   if Ak_74_Silencieux = 0
+   play sound 1041
+   else
+   play sound Ak_74_Silencieux
+   endif
+   rand = rnd(1)
+   if rand = 1 then rotate camera camera angle X()+rnd(2)-1,camera angle Y()+rnd(2)-1,camera angle Z()
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+
+   if mouseclick() = 2
+   oldakmire = AK74_mire
+   AK74_mire = 1
+   sprite 14,1,1,22
+   show sprite 14
+   hide sprite 15
+   exclude object on game_arme_coress(arme)
+   if Ak_74_Silencieux > 0 then exclude object on Ak_74_Silencieux
+   Joueur_immobile = 1
+   if AK_74_Lazer > 1
+   Game_lazer_visible = 1
+   endif
+   endif
+   if mouseclick() = 1
+   oldakmire = AK74_mire
+   AK74_mire = 0
+   hide sprite 14
+   show sprite 15
+   Joueur_immobile = 0
+   Game_lazer_visible = 0
+   endif
+   if mouseclick() = 0
+   oldakmire = AK74_mire
+   AK74_mire = 0
+   hide sprite 14
+   show sprite 15
+   Joueur_immobile = 0
+   Game_lazer_visible = 0
+   endif
+   if oldakmire = 1 and AK74_mire = 0
+   exclude object off game_arme_coress(arme)
+   if Ak_74_Silencieux > 0 then exclude object off Ak_74_Silencieux
+   Joueur_immobile = 0
+   endif
+
+
+   endcase
+Rem ================================================= Glock ===============================================================
+rem =========================================================================================================================
+
+   case 1010
+   set cursor param(35)-256,param(36)-100
+   print "Glock 17"
+   set cursor param(35)-300,param(36)-60
+   print "Pistolet 9mm Parabellum en polymère "
+   if Glock_17_Silencieux > 0
+   set cursor param(35)-380,param(36)-40
+   print "Evitez les detecteurs de métaux, on a pas encore inventé les silencieux en plastique"
+   position object Glock_17_Silencieux,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   rotate object Glock_17_Silencieux,camy#+270,camx#,0
+   endif
+   if mouseclick() = 1 and tir_glock_phase = 0 and listarme(game_arme_coress(arme)-1000).bulets_encour > 0
+   dec listarme(game_arme_coress(arme)-1000).bulets_encour
+   tir_glock_phase = 1
+   if Glock_17_Silencieux = 0
+   play sound 1010
+   else
+   play sound Glock_17_Silencieux
+   endif
+   stop object game_arme_coress(arme)
+   play object game_arme_coress(arme),50,55
+   tX# = camera position X()
+   tY# = camera position y()
+   tZ# = camera position z()
+   move camera 12000
+   Xtemp# = camera position X()
+   Ytemp# = camera position y()
+   Ztemp# = camera position z()
+   move camera -12000
+   collide=SC_rayCast(0,tX#,tY#,tZ#,Xtemp#,Ytemp#,Ztemp#,0)
+   if collide > 0
+   inc p
+   if p > 10 then p = 1
+   Xtemp# = SC_getStaticCollisionX()
+   Ytemp# = SC_getStaticCollisionY()
+   Ztemp# = SC_getStaticCollisionZ()
+   rx#=SC_getCollisionNormalX()
+   ry#=SC_getCollisionNormalY()
+   rz#=SC_getCollisionNormalZ()
+   endif
+   endif
+   if mouseclick() = 0 and tir_glock_phase = 1 then tir_glock_phase = 0
+   endcase
+
+endselect
+
+   if collide = 5000 and VieD > 0
+   temp =game_arme_coress(arme)
+    select temp
+    case 1010
+    dec vied,rnd(7)
+    endcase
+    case 1040
+    dec vied,rnd(10)
+    endcase
+    case 1041
+    dec vied,rnd(7)
+    endcase
+    case 1050
+    dec vied,rnd(20)
+    endcase
+    case 1051
+    dec vied,rnd(30)
+    endcase
+    case 1070
+    dec vied,rnd(80)
+    endcase
+    endselect
+   endif
+   if collide = 5001 and VieD > 0
+    dec vied,rnd(9999)
+    game_console_txtametr$ = "  === Headshot ===  "
+    exclude object on 5000
+    position object 5000,9999999,99999999,99999999
+    sc_updateobject 5000
+    drespawn = 100
+
+   endif
+
+if listarme(game_arme_coress(arme)-1000).Bulets_encour = 0 and listarme(game_arme_coress(arme)-1000).bulets_Stock > 0
+listarme(game_arme_coress(arme)-1000).Bulets_encour = -41
+endif
+if listarme(game_arme_coress(arme)-1000).Bulets_encour < -1 then inc listarme(game_arme_coress(arme)-1000).Bulets_encour
+
+if listarme(game_arme_coress(arme)-1000).Bulets_encour = -1
+
+if listarme(game_arme_coress(arme)-1000).bulets_Stock >= listarme(game_arme_coress(arme)-1000).BuletsparChargeur
+dec listarme(game_arme_coress(arme)-1000).bulets_Stock,listarme(game_arme_coress(arme)-1000).BuletsparChargeur
+listarme(game_arme_coress(arme)-1000).Bulets_encour = listarme(game_arme_coress(arme)-1000).BuletsparChargeur
+else
+listarme(game_arme_coress(arme)-1000).Bulets_encour = listarme(game_arme_coress(arme)-1000).bulets_Stock
+listarme(game_arme_coress(arme)-1000).bulets_Stock = 0
+endif
+endif
+
+endif
+return

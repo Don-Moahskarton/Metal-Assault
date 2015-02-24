@@ -1,0 +1,520 @@
+Rem *** Include File: Game_market.dba ***
+Rem Created: 27/02/2008 12:04:29
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+market:
+gosub Market_armure
+Solde = Player_stats(0)
+set dir CheminMA$+"\Models\Armes\"
+open to read 1,"index.ini"
+repeat
+read string 1,temp$
+if temp$ = "[arme]"
+read string 1,temp$
+read string 1,temp2$
+listarme(int(val(temp2$))).name$ = temp$
+read string 1,temp$
+listarme(int(val(temp2$))).price = val(temp$)
+read string 1,temp$
+listarme(int(val(temp2$))).poid = val(temp$)
+read string 1,temp$
+listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+read string 1,temp$
+listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+endif
+until file end(1) = 1
+close file 1
+
+set dir CheminMA$+"\Jpegs\jeu\market"
+show mouse
+load image "principal.jpg",17,1
+set image colorkey 10,10,10
+market_start:
+do
+paste image 17,0,0
+if boutton2(100,100,180,130) = 1 or keystate(2) = 1
+delete image 17
+load image "Pistolets.jpg",17,1
+market_status = 1
+endif
+if boutton2(180,100,317,130) = 1 or keystate(3) = 1
+delete image 17
+load image "automatiques.jpg",17,1
+market_status = 2
+endif
+if boutton2(317,100,400,130) = 1 or keystate(4) = 1
+delete image 17
+load image "a pompe.jpg",17,1
+market_status = 3
+endif
+if boutton2(400,100,550,130) = 1 or keystate(5) = 1
+delete image 17
+load image "Fusils d'assaults.jpg",17,1
+market_status = 4
+endif
+if boutton2(550,100,640,130) = 1 or keystate(6) = 1
+delete image 17
+load image "miniguns.jpg",17,1
+market_status = 5
+endif
+if boutton2(640,100,695,130) = 1 or keystate(7) = 1
+delete image 17
+load image "Lourd.jpg",17,1
+market_status = 6
+endif
+if boutton2(695,100,750,130) = 1 or keystate(8) = 1
+delete image 17
+load image "Snipe.jpg",17,1
+market_status = 7
+endif
+if boutton2(750,100,825,130) = 1 or keystate(9) = 1
+delete image 17
+load image "Spécial.jpg",17,1
+market_status = 8
+endif
+if boutton2(825,100,900,130) = 1 or keystate(10) = 1
+delete image 17
+load image "a main.jpg",17,1
+market_status = 9
+endif
+set cursor 0,0
+ink rgb(0,0,0),0
+print screen fps()
+if market_status > 4 then set cursor 200,170 : print "Solde : ",Solde," $" : set cursor 200,190 : print "Capacitée : ",Game_armure_force-poid_achat : else : set cursor 660,170 : print "Solde : ",Solde," $" : set cursor 660,190 : print "Capacitée : ",Game_armure_force-poid_achat
+if boutton2(664,16,830,72) = 1 then goto market_end
+if market_status = 0 then : else : goto market_sub
+loop
+
+
+
+
+market_sub:
+set image colorkey 10,10,10
+color backdrop rgb(0,0,0)
+do
+set dir CheminMA$+"\Jpegs\jeu\market"
+paste image 17,0,0,1
+if boutton2(100,100,180,130) = 1
+delete image 17
+load image "Pistolets.jpg",17,1
+market_status = 1
+endif
+if boutton2(180,100,317,130) = 1
+delete image 17
+load image "automatiques.jpg",17,1
+market_status = 2
+endif
+if boutton2(317,100,400,130) = 1
+delete image 17
+load image "a pompe.jpg",17,1
+market_status = 3
+endif
+if boutton2(400,100,550,130) = 1
+delete image 17
+load image "Fusils d'assaults.jpg",17,1
+market_status = 4
+endif
+if boutton2(550,100,640,130) = 1
+delete image 17
+load image "miniguns.jpg",17,1
+market_status = 5
+endif
+if boutton2(640,100,695,130) = 1
+delete image 17
+load image "Lourd.jpg",17,1
+market_status = 6
+endif
+if boutton2(695,100,750,130) = 1
+delete image 17
+load image "Snipe.jpg",17,1
+market_status = 7
+endif
+if boutton2(750,100,825,130) = 1
+delete image 17
+load image "Spécial.jpg",17,1
+market_status = 8
+endif
+if boutton2(825,100,900,130) = 1
+delete image 17
+load image "a main.jpg",17,1
+market_status = 9
+endif
+set cursor 0,0
+ink rgb(0,0,0),0
+print screen fps()
+if market_status > 4
+set cursor 200,170
+print "Solde : ",Solde," €"
+set cursor 200,150
+print "Coût de cette arme : ",market_priarme," $"
+set cursor 200,190
+print "Capacitée : ",Game_armure_force-poid_achat
+set cursor 200,210
+print "Poid de cette arme : ",market_poidarme," Kg"
+else
+set cursor 660,170
+print "Solde : ",Solde," €"
+set cursor 660,150
+print "Coût de cette arme : ",market_priarme," $"
+set cursor 660,190
+print "Capacitée : ",Game_armure_force-poid_achat
+set cursor 660,210
+print "Poid de cette arme : ",market_poidarme," Kg"
+endif
+if boutton2(664,16,830,72) = 1 then goto market_end
+rem ======================================
+select market_status
+case 1
+set cursor 185,140
+print listarme(10).name$
+set cursor 185,180
+print listarme(11).name$
+set cursor 185,220
+print listarme(12).name$
+set cursor 185,260
+print listarme(13).name$
+set cursor 185,300
+print listarme(14).name$
+set cursor 185,340
+print listarme(15).name$
+set cursor 185,380
+print listarme(16).name$
+set cursor 185,420
+print listarme(17).name$
+set cursor 185,460
+print listarme(18).name$
+set cursor 185,500
+print listarme(19).name$
+endcase
+case 2
+set cursor 285,140
+print listarme(20).name$
+set cursor 285,180
+print listarme(21).name$
+set cursor 285,220
+print listarme(22).name$
+set cursor 285,260
+print listarme(23).name$
+set cursor 285,300
+print listarme(24).name$
+set cursor 285,340
+print listarme(25).name$
+set cursor 285,380
+print listarme(26).name$
+set cursor 285,420
+print listarme(27).name$
+set cursor 285,460
+print listarme(28).name$
+set cursor 285,500
+print listarme(29).name$
+endcase
+case 3
+set cursor 400,140
+print listarme(30).name$
+set cursor 400,180
+print listarme(31).name$
+set cursor 400,220
+print listarme(32).name$
+set cursor 400,260
+print listarme(33).name$
+set cursor 400,300
+print listarme(34).name$
+set cursor 400,340
+print listarme(35).name$
+set cursor 400,380
+print listarme(36).name$
+set cursor 400,420
+print listarme(37).name$
+set cursor 400,460
+print listarme(38).name$
+set cursor 400,500
+print listarme(39).name$
+endcase
+case 4
+set cursor 285,140
+print listarme(40).name$
+set cursor 285,180
+print listarme(41).name$
+set cursor 285,220
+print listarme(42).name$
+set cursor 285,260
+print listarme(43).name$
+set cursor 285,300
+print listarme(44).name$
+set cursor 285,340
+print listarme(45).name$
+set cursor 285,380
+print listarme(46).name$
+set cursor 285,420
+print listarme(47).name$
+set cursor 285,460
+print listarme(48).name$
+set cursor 285,500
+print listarme(49).name$
+endcase
+case 5
+set cursor 630,140
+print listarme(50).name$
+set cursor 630,180
+print listarme(51).name$
+set cursor 630,220
+print listarme(52).name$
+set cursor 630,260
+print listarme(53).name$
+set cursor 630,300
+print listarme(54).name$
+set cursor 630,340
+print listarme(55).name$
+set cursor 630,380
+print listarme(56).name$
+set cursor 630,420
+print listarme(57).name$
+set cursor 630,460
+print listarme(58).name$
+set cursor 630,500
+print listarme(59).name$
+endcase
+case 6
+set cursor 700,140
+print listarme(60).name$
+set cursor 700,180
+print listarme(61).name$
+set cursor 700,220
+print listarme(62).name$
+set cursor 700,260
+print listarme(63).name$
+set cursor 700,300
+print listarme(64).name$
+set cursor 700,340
+print listarme(65).name$
+set cursor 700,380
+print listarme(66).name$
+set cursor 700,420
+print listarme(67).name$
+set cursor 700,460
+print listarme(68).name$
+set cursor 700,500
+print listarme(69).name$
+endcase
+case 7
+set cursor 555,140
+print listarme(70).name$
+set cursor 555,180
+print listarme(71).name$
+set cursor 555,220
+print listarme(72).name$
+set cursor 555,260
+print listarme(73).name$
+set cursor 555,300
+print listarme(74).name$
+set cursor 555,340
+print listarme(75).name$
+set cursor 555,380
+print listarme(76).name$
+set cursor 555,420
+print listarme(77).name$
+set cursor 555,460
+print listarme(78).name$
+set cursor 555,500
+print listarme(79).name$
+endcase
+case 8
+set cursor 640,140
+print listarme(80).name$
+set cursor 640,180
+print listarme(81).name$
+set cursor 640,220
+print listarme(82).name$
+set cursor 640,260
+print listarme(83).name$
+set cursor 640,300
+print listarme(84).name$
+set cursor 640,340
+print listarme(85).name$
+set cursor 640,380
+print listarme(86).name$
+set cursor 640,420
+print listarme(87).name$
+set cursor 640,460
+print listarme(88).name$
+set cursor 640,500
+print listarme(89).name$
+endcase
+case 9
+set cursor 631,140
+print listarme(90).name$
+set cursor 631,180
+print listarme(91).name$
+set cursor 631,220
+print listarme(92).name$
+set cursor 631,260
+print listarme(93).name$
+set cursor 631,300
+print listarme(94).name$
+set cursor 631,340
+print listarme(95).name$
+set cursor 631,380
+print listarme(96).name$
+set cursor 631,420
+print listarme(97).name$
+set cursor 631,460
+print listarme(98).name$
+set cursor 631,500
+print listarme(99).name$
+endcase
+endselect
+rem ======================================
+if mousey() > 135 and mousey() < 160
+market_armacharger = market_status * 10 +0
+endif
+if mousey() > 160 and mousey() < 200
+market_armacharger = market_status * 10 +1
+endif
+if mousey() > 200 and mousey() < 240
+market_armacharger = market_status * 10 +2
+endif
+if mousey() > 240 and mousey() < 280
+market_armacharger = market_status * 10 +3
+endif
+if mousey() > 280 and mousey() < 320
+market_armacharger = market_status * 10 +4
+endif
+if mousey() > 320 and mousey() < 360
+market_armacharger = market_status * 10 +5
+endif
+if mousey() > 360 and mousey() < 400
+market_armacharger = market_status * 10 +6
+endif
+if mousey() > 400 and mousey() < 440
+market_armacharger = market_status * 10 +7
+endif
+if mousey() > 440 and mousey() < 480
+market_armacharger = market_status * 10 +8
+endif
+if mousey() > 480 and mousey() < 520
+market_armacharger = market_status * 10 +9
+endif
+gosub market_chargarme
+if mouseclick() = 1 and mousey()>135
+select market_armacharger
+case 10
+if Solde >= 520 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=1
+dec solde,listarme(10).price
+inc poid_achat,listarme(10).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 30
+if Solde >= 13000 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=13
+dec solde,listarme(30).price
+inc poid_achat,listarme(30).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 40
+if Solde >= 5000 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=9
+dec solde,listarme(40).price
+inc poid_achat,listarme(40).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 41
+if Solde >= 4825 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=9
+dec solde,listarme(41).price
+inc poid_achat,listarme(41).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 50
+if Solde >= 2000 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=19
+dec solde,listarme(50).price
+inc poid_achat,listarme(50).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 51
+if Solde >= 1500 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=17
+dec solde,listarme(51).price
+inc poid_achat,listarme(51).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 60
+if Solde >= 10000 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=23
+dec solde,listarme(60).price
+inc poid_achat,listarme(60).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+case 70
+if Solde >= 8000 and game_arme_embaquee(market_armacharger) = 0 and Game_armure_force-poid_achat>=5
+dec solde,listarme(70).price
+inc poid_achat,listarme(70).poid
+game_arme_embaquee(market_armacharger) = 1
+arme = 1000+market_armacharger
+endif
+endcase
+endselect
+
+endif
+loop
+
+
+market_chargarme:
+select market_armacharger
+case 10
+market_priarme = listarme(10).price
+market_poidarme = listarme(10).poid
+endcase
+case 30
+market_priarme = listarme(30).price
+market_poidarme = listarme(30).poid
+endcase
+case 40
+market_priarme = listarme(40).price
+market_poidarme = listarme(40).poid
+endcase
+case 41
+market_priarme = listarme(41).price
+market_poidarme = listarme(41).poid
+endcase
+case 50
+market_priarme = listarme(50).price
+market_poidarme = listarme(50).poid
+endcase
+case 51
+market_priarme = listarme(51).price
+market_poidarme = listarme(51).poid
+endcase
+case 60
+market_priarme = listarme(60).price
+market_poidarme = listarme(60).poid
+endcase
+case 70
+market_priarme = listarme(70).price
+market_poidarme = listarme(70).poid
+endcase
+endselect
+return
+
+
+
+market_end:
+hide mouse
+set image colorkey 0,0,0
+if Solde >= 520
+game_arme_embaquee(10) = 1
+endif
+exclude object on arme
+Player_stats(0) = Solde
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+return

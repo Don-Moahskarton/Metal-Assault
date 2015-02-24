@@ -1,0 +1,241 @@
+Rem *** Include File: Game.dba ***
+Rem Created: 30/08/2007 22:14:12
+
+Rem Included in Project: C:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+game:
+rem =========================================================
+rem =========================================================
+rem =========================================================
+do
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+inc temporel,Extrapolation*3
+position mouse 0,0
+FPS = screen fps()
+vitesse_joueur# = Extrapolation
+set cursor 0,0
+print "FPS : ",FPS
+print "Polygones :", statistic(1)
+set cursor param(35)-200,0
+ink rgb(255,255,255),0
+if vied > 0 then sc_updateobject 5000
+
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.005*zoom
+camx#=camx#+mousemoveX()*0.005*zoom
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera curveangle(camx#,oldcamx#,30)
+xrotate camera curveangle(camy#,oldcamy#,30)
+
+position object arme,object position x(3),object position y(3)+tailleperso#,object position z(3)
+rotate object arme,oldcamy#+270,oldcamx#,0
+   oldx# = object position x(3)
+   oldy# = object position y(3)
+   oldz# = object position z(3)
+   oldx2# = object position x(2)
+   oldy2# = object position y(2)
+   oldz2# = object position z(2)
+   oldx3# = object position x(4)
+   oldy3# = object position y(4)
+   oldz3# = object position z(4)
+if upkey()=1 or KEYSTATE(param(48)) = 1 then x#=newxvalue(x#,camX#,vitesse_joueur#) : z#=newzvalue(z#,camx#,vitesse_joueur#):rem   y#=newyvalue(y#,camy#,vitesse_joueur#)
+if downkey()=1 or KEYSTATE(param(49)) = 1 then x#=newxvalue(x#,camx#,-vitesse_joueur#) : z#=newzvalue(z#,camx#,-vitesse_joueur#):rem   y#=newyvalue(y#,camy#,-vitesse_joueur#)
+if rightkey() = 1 or KEYSTATE(param(50)) = 1 then X# = NewXValue(X#,camx#+90,vitesse_joueur#/2): Z# = NewZValue(Z#,camx#+90,vitesse_joueur#/2):rem  y#=newyvalue(y#,camy#,vitesse_joueur#/2)
+if leftkey() = 1 or KEYSTATE(param(51)) = 1 then X# = NewXValue(X#,camx#-90,vitesse_joueur#/2): Z# = NewZValue(Z#,camx#-90,vitesse_joueur#/2):rem y#=newyvalue(y#,camy#,vitesse_joueur#/2)
+position object 3,x#,y#,z#
+position camera object position x(3),object position y(3)+tailleperso#+ sin(temporel)*5,object position z(3)
+position light 1,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+position object arme,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   x2# = object position x(3)
+   y2# = object position y(3)
+   z2# = object position z(3)
+   x3# = object position x(2)
+   y3# = object position y(2)
+   z3# = object position z(2)
+   x4# = object position x(4)
+   y4# = object position y(4)
+   z4# = object position z(4)
+ rem gravitée
+ if on_saute  = 0
+ dec y#,gravite#
+ y# = y# - 3
+ endif
+ collide = sc_SphereSlideGroup(0,oldx2#,oldy2#-45,oldz2#,x3#,y3#-45,z3#,radius#,0)
+   if collide>0
+      x# = sc_getCollisionSlideX()
+      y# = sc_getCollisionslideY()/5
+      z# = sc_getCollisionSlideZ()
+      position object 3,x#,y#,z#
+      position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position light 1,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+      position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+      position object arme,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   endif
+ rem gravitée
+ if on_saute  = 0
+ dec y#,gravite#
+ y# = y# - 3
+ endif
+rem la fin de la gravitée si on touche par terre
+   collide2 = sc_SphereSlideGroup(0,oldx#,oldy#,oldz#,x2#,y2#,z2#,radius#,0)
+   if collide2>0
+      y# = sc_getCollisionslideY()
+      position object 3,x#,y#,z#
+      position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position light 1,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+      position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+      position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+position object arme,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   endif
+ rem gravitée
+ if on_saute  = 0
+ dec y#,gravite#
+ y# = y# - 3
+ endif
+ collide3 = sc_SphereSlideGroup(0,oldx3#,oldy3#,oldz3#,x4#,y4#,z4#,radius#,0)
+   if collide3>0 and collide=0
+     inc y#,gravite#+0.1
+     position object 3,x#,y#,z#
+     position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+     position light 1,object position x(3),object position y(3)+tailleperso#,object position z(3)
+     position object 1002,object position x(3),object position y(3)+tailleperso#,object position z(3) : sc_updateobject 1002
+     position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+     position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+position object arme,object position x(3),object position y(3)+tailleperso#,object position z(3)
+   endif
+ rem gravitée
+ if on_saute  = 0
+ dec y#,gravite#
+ y# = y# - 3
+ endif
+
+   sc_updateObject 2
+   sc_updateObject 3
+   sc_updateObject 4
+   gosub Game_aux
+
+loop
+
+
+
+
+game_aux:
+rem saut
+if mouseclick() = 4 or KEYSTATE(57) = 1 and on_saute = 0
+on_saute = 1
+tenpsaut = 0
+endif
+if on_saute = 1
+inc y#,valsaut#
+valsaut# = 20*sin(tenpsaut)
+inc tenpsaut,Extrapolation*1.5
+if tenpsaut > 90 then tenpsaut = 0 : on_saute  = 0
+endif
+
+rem l'administration de la partie
+if type_game$="Match_mort"
+gosub admin
+endif
+
+rem armes et tout le tralala
+gosub armes
+
+if type_game$="Domination"
+gosub domadmin
+endif
+
+rem les enemeis et les alliés
+
+if type_game$="Match_mort"
+gosub IAmatchamort
+endif
+
+if type_game$="Domination"
+gosub IAdomination
+endif
+
+rem la console\le chat
+gosub console
+
+rem les aux en tout genre
+gosub dam_warn
+
+rem on est mort si on touche le ciel
+gosub skyfrag
+
+rem on tourene eventuellement le ciel
+gosub rotate_sky
+
+rem reour au menu principal
+if escapekey() = 1
+wait key
+if escapekey() = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+delete object 1
+delete object 2
+delete object 3
+delete object 4
+delete object 5
+delete object 6
+delete object 7
+delete object 8
+delete object 9
+delete object 10
+delete object arme
+delete object 12
+delete sound 1
+delete sound 2
+delete music 1
+delete image 15
+delete image 10
+delete sprite 15
+delete sprite 18
+close file 1
+delete animation 1
+goto debut
+else
+goto game
+endif
+endif
+
+return
+
+
+
+
+Etat_Mort:
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 0.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+temp = 255
+stop object arme
+sprite 16,0,-1200,16
+do
+inc temp,10
+if temp <12000
+sprite 16,0,-1200+temp /10,16
+else
+sprite 16,0,0,16
+endif
+Game_Gam_mod = 50*sin(temp/1.5)+50
+set gamma 255+(Game_Gam_mod/2),155-Game_Gam_mod,255-Game_Gam_mod
+if mouseclick() =1 then exit
+loop
+delete sprite 16
+loop object arme
+set gamma 255,255,255
+return
+

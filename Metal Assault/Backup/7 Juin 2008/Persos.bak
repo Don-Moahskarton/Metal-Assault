@@ -1,0 +1,114 @@
+Rem *** Include File: Persos.dba ***
+Rem Created: 01/01/2008 15:53:13
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+IAmatchamort:
+
+sc_updateobject 5000
+if VieD > 0
+position object 5000,dX#,dY#,dZ#
+point object 5000,object position x(1002),object position y(1002),object position z(1002)
+if distance(5000,3)> 300
+oX# = object position X(5000)
+oY# = object position Y(5000)
+oZ# = object position Z(5000)
+
+rem le décisionel
+if IAdecision_duree <= 0
+IAdecision_duree = 100
+if distance(5000,3) < 400
+IAdecision = 4
+else
+IAdecision = rnd(4)
+endif
+if distance(2,3) > 2000
+IAdecision = 3
+else
+IAdecision = rnd(6)
+endif
+endif
+
+rem l'executif
+if IAdecision = 0
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 1
+   move object left 5000,((FPS*-1)+400)/12
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 2
+   move object right 5000,((FPS*-1)+400)/12
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 3
+   move object 5000,((FPS*-1)+400)/12
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 4
+   move object 5000,(((FPS*-1)+400)/12)*-1
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 5
+   move object 5000,((FPS*-1)+400)/12
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+if IAdecision = 6
+   move object 5000,((FPS*-1)+400)/12
+   dec IAdecision_duree,((FPS*-1)+400)/12
+endif
+
+
+
+
+dX# = object position X(5000)
+dY# = object position Y(5000)
+dZ# = object position Z(5000)
+dY# = dY# -gravite#
+botcollide = SC_SphereCast(1,ox#,oy#,oz#,dX#,dY#,dZ#,20+ nbsentinelles*50,0)
+if botcollide
+dX# = SC_getcollisionslideX()
+dY# = SC_getcollisionslideY()
+dZ# = SC_getcollisionslideZ()
+endif
+position object 5000,dX#,dY#,dZ#
+endif
+if nbsentinelles = 1 then position object 5001,dx#,dy#+120+solo_model_St*60,dz# : sc_updateobject 5001
+IA_Precision  = 130-3*sqrt(distance(5000,3))+52+distance(5000,3)^(1/3)
+endif
+
+
+if dtime+1000 + nbwarmachines*1000<timer()
+IA_tir_possible = 1
+else
+IA_tir_possible =0
+endif
+
+if IA_tir_possible = 1
+dX# = object position X(5000)
+dY# = object position Y(5000)
+dZ# = object position Z(5000)
+move object 5000,20000
+dXtemp# = object position X(5000)
+dYtemp# = object position Y(5000)
+dZtemp# = object position Z(5000)
+move object 5000,-20000
+dtime = timer()
+IAcollide = SC_rayCast(0,dX#,dY#,dZ#,dXtemp#,dYtemp#,dZtemp#,5000)
+if IAcollide = 1002 and IA_tir_possible = 1
+play sound 1103
+temp = rnd(100)
+IAtircollide = SC_rayCast(0,dX#,dY#,dZ#,X#,Y#,Z#,5000)
+if temp < IA_Precision and IAtircollide = 0 : rem le pourcentage du droîde et verification que la balle ne traverse pas un mur
+dec vie,(18+rnd(2))/((nbwarmachines*2)+1)
+dam_warn = 200
+IA_tir_possible =0
+endif
+endif
+endif
+
+
+
+return
+
+

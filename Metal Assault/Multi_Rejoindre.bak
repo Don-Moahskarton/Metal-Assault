@@ -1,0 +1,122 @@
+Rem *** Include File: Multi_Rejoindre.dba ***
+Rem Created: 19/04/2008 17:27:19
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Multi_Rejoindre:
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+set image colorkey 0,252,0
+if image exist(4) then delete image 4
+load image "Multi_PartieSelect.jpg",4,1
+Multi_Rejoindre_etatptispoints# = 0
+clear entry buffer
+
+do
+rem l'extrapolation
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+print Extrapolation
+OldExtrapolationTimer=NewExtrapolationTimer
+rem le boutton retour
+if boutton2(0,84,220,134)
+delete image 4
+show sprite 1
+show sprite 2
+set image colorkey 0,0,0
+goto menu_base:
+endif
+rem l'affichage (des ptis points,des ptis points,des ptis points points points !!!!)
+paste image 4,0,0,4
+if Multi_Rejoindre_etatptispoints# = 0
+set cursor 70,200
+print "Recherche d'un serveur"
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 0 and  Multi_Rejoindre_etatptispoints# <= 1
+set cursor 70,200
+print "Recherche d'un serveur"
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 1 and  Multi_Rejoindre_etatptispoints# <= 2
+set cursor 70,200
+print "Recherche d'un serveur."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 2 and  Multi_Rejoindre_etatptispoints# <= 3
+set cursor 70,200
+print "Recherche d'un serveur.."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 3
+set cursor 70,200
+print "Recherche d'un serveur..."
+inc Multi_Rejoindre_etatptispoints#,0.05
+endif
+if Multi_Rejoindre_etatptispoints# > 4
+Multi_Rejoindre_etatptispoints# = 0
+endif
+set cursor 70,215
+Ip$= entry$(1)
+print "Donnez l'ip du serveur a rejoindre(sans le port) : " + Ip$
+set cursor 70,230
+Print Multi_rejoindre_console1$
+if returnkey()
+temp = Net Connect( ip$ )
+   If (Not temp)
+      set cursor 70,230
+      Multi_rejoindre_console1$ = "Impossible de se connecter: "+chr$(34)+net get error()+chr$(34)+"."
+      clear entry buffer
+      else
+      goto Multi_connect
+   Endif
+endif
+loop
+
+
+
+
+
+Multi_connect:
+
+   `faut dire au seveur kon est la (y mettre toutes les infos non devinables par le srv)
+    Net Put Byte New_player_data
+    Net Put String Configjoueur$
+    Net Send 1
+
+   rem on attend sa réponse
+   time = timer()
+   do
+      if time + 900 < timer() then Multi_rejoindre_console1$ = "Réponse du serveur incomplête." : goto Multi_Rejoindre
+      reponse = net get message()
+      if reponse <> 0 then exit
+   loop
+   rem on a recu la réponse
+   temp = net get byte()
+   if temp <> Player_accepted_in_game then Multi_rejoindre_console1$ = "Connection rejetée par le serveur." : goto Multi_Rejoindre
+   temp = 0
+   Multi_partie_lancee = net get byte()
+
+   rem on met a jour le pot commun
+   Multi_Your_no = net get byte()
+   Multi_nb_player = net get byte()
+   for i = 0 to Multi_nb_player-1
+      array insert at bottom joueurs()
+   next i
+   for i = 0 to Multi_Your_no
+       joueurs(i).name$ = net get string()
+   next i
+   joueurs(Multi_Your_no).name$ = Configjoueur$
+   Fraglimit = Net get Byte()
+   game_carte$ = Net get String()
+   nbwarmachines = Net get Byte()
+   nbsentinelles = Net get Byte()
+   nballies = Net get Byte()
+   rem Let's GO !
+   if Multi_partie_lancee = 1
+   rem on entre direct en jeu, faudra par contre modifier le chargement en conséquence (NE PAS FAIRE UNE COPIE DU FCHIER !)
+   goto load_game
+   else
+   Menu_SRV = 0
+   goto Multi_prepa_partie
+   endif

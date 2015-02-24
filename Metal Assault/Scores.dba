@@ -1,0 +1,149 @@
+Rem *** Include File: Scores.dba ***
+Rem Created: 02/07/2008 10:58:09
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Scores:
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "Scores.jpg",18
+set sprite alpha 18,255
+show sprite 18
+
+for i = 1 to 9
+Player_stats(11-i) = Player_stats(10-i)
+next i
+if mort <> 0
+frag# = Frag
+mort# = mort
+Ratio# = Frag#/mort#
+Player_stats(1)= floor(Ratio#)
+else
+Player_stats(1)= ceil(frag#)
+endif
+
+if mort = 0
+Bonus = Frag * 500
+Player_stats(0) = Player_stats(0) + Bonus
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+endif
+
+do
+set cursor 0,0
+sync
+sprite 18,0,0,18
+set sprite alpha 18,100
+
+ink RGB(128,128,255),0
+set cursor 70,63
+print Configjoueur$
+set cursor 455,63
+print Frag
+set cursor 650,63
+print mort
+set cursor 865,63
+if mort > 0
+frag# = Frag
+mort# = mort
+Ratio# = Frag#/mort#
+print Ratio#
+else
+print str$(Frag)+"*"
+endif
+
+for t = 0 to nballies-1
+set cursor 70,83+t*20
+print allie(t).name$
+set cursor 455,83+t*20
+print allie(t).frag
+set cursor 650,83+t*20
+print allie(t).mort
+set cursor 865,83+t*20
+if allie(t).mort > 0
+temp1# =allie(t).frag
+temp2# =allie(t).mort
+Ratio# = temp1#/temp2#
+print Ratio#
+else
+print str$(allie(t).frag) + "*"
+endif
+next t
+
+ink RGB(255,0,0),0
+for t = nballies to nballies+NbBot-1
+set cursor 70,83+t*20
+print bot(t).name$
+set cursor 455,83+t*20
+print bot(t).frag
+set cursor 650,83+t*20
+print bot(t).mort
+set cursor 865,83+t*20
+if bot(t).mort > 0
+temp1# =bot(t).frag
+temp2# =bot(t).mort
+Ratio# = temp1#/temp2#
+print Ratio#
+else
+print str$(bot(t).frag) + "*"
+endif
+next t
+
+
+if RHL_PTS > CID_PTS
+ink RGB(128,128,255),0
+center text param(35)/2,param(36)/2+50,"La RHL l'emporte !"
+else
+ink RGB(255,0,0),0
+center text param(35)/2,param(36)/2+50,"La CID l'emporte !"
+endif
+if mort = 0
+center text param(35)/2,param(36)/2+80,"Pas De Failles ! Bonus : " + str$(Bonus) +"€"
+endif
+
+if escapekey() = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+close file 1
+delete animation 1
+for t = 1 to 60000
+if object exist(t) = 1 then delete object t
+next t
+for t = 1 to 60000
+if image exist(t) = 1 then delete image t
+next t
+for t = 1 to 60000
+if sprite exist(t) = 1 then delete sprite t
+next t
+for t = 1 to 60000
+if sound exist(t) = 1 then delete sound t
+next t
+for t = 1 to 60000
+if light exist(t) = 1 then delete light t
+next t
+for t = 1 to 60000
+if object exist(t)
+SC_setupObject t,0,0
+SC_removeObject t
+endif
+next t
+delete music 1
+goto debut
+endif
+
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=(camy#+mousemoveY()*0.005*zoom)+((sin(90*sin(200*timer()/((Player_MovHB#+1)*100)+90))/(-10))/2)*player_mvt
+camx#=(camx#+mousemoveX()*0.005*zoom)+((sin(100*timer()/((Player_MovHB#+1)*100))/10)/2)*player_mvt
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera camx#
+xrotate camera camy#
+
+loop
+
+return

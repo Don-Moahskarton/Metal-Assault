@@ -1,0 +1,231 @@
+Rem *** Include File: Admin.dba ***
+Rem Created: 03/01/2008 14:17:05
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+admin:
+if sound exist(3) = 1
+if sound playing(3) = 0 then delete sound 3
+endif
+rem ========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ========================================================================================================================
+rem le respawn des droides
+for i = 0 to nbBot-1
+if Bot(i).Vie <= 0
+if Bot(i).Vie = -100000000
+else
+if allie_meutrieur = 0
+New_txt(1,"Vous avez cassé " + Bot(i).Name$,26,0,0,255,screen width()/2,screen height()/2-50,256,256)
+if Fragdaffile = 4 and Fragdaffile_temoin = 1 then Fragdaffile_temoin = 0 : New_txt(3,"Folie Meurtrière",26,0,0,255,screen width()/2,screen height()/2-150,256,256)
+if Fragdaffile = 9 and Fragdaffile_temoin = 1 then Fragdaffile_temoin = 0 : New_txt(3,"Domination !",26,120,120,255,screen width()/2,screen height()/2-150,256,256)
+if Fragdaffile = 14 and Fragdaffile_temoin = 1 then Fragdaffile_temoin = 0 : New_txt(3,"== Comme un Dieu ==",26,255,255,255,screen width()/2,screen height()/2-150,256,256)
+rand = rnd(10)
+select rand
+case 0
+game_console_txtametr$ = Configjoueur$+" a cassé " + Bot(i).Name$
+endcase
+case 1
+game_console_txtametr$ = Configjoueur$+" a étalé " + Bot(i).Name$
+endcase
+case 2
+game_console_txtametr$ = Configjoueur$+" a fait un trou dans " + Bot(i).Name$
+endcase
+case 3
+game_console_txtametr$ = Bot(i).Name$ + " est en pieces détachés a cause de "+Configjoueur$
+endcase
+case 4
+game_console_txtametr$ = Configjoueur$+" est devenu plieur de tôles"
+endcase
+case 5
+game_console_txtametr$ = Bot(i).Name$ + " n'existe plus"
+endcase
+case 6
+game_console_txtametr$ = Configjoueur$+" a perforé " + Bot(i).Name$
+endcase
+case 7
+game_console_txtametr$ = Bot(i).Name$ + " a été court-circuité"
+endcase
+case 8
+game_console_txtametr$ = Bot(i).Name$ + " a désormais de quoi jongler"
+endcase
+case 9
+game_console_txtametr$ = Configjoueur$+" a fragué"
+endcase
+case 10
+game_console_txtametr$ = Configjoueur$+" est intervenu"
+endcase
+endselect
+inc Frag
+inc Fragdaffile
+Fragdaffile_temoin = 1
+else
+rand = rnd(10)
+select rand
+case 0
+game_console_txtametr$ = allie(i).Name$+" a cassé " + Bot(i).Name$
+endcase
+case 1
+game_console_txtametr$ = allie(i).Name$+" a étalé " + Bot(i).Name$
+endcase
+case 2
+game_console_txtametr$ = allie(i).Name$+" a fait un trou dans " + Bot(i).Name$
+endcase
+case 3
+game_console_txtametr$ = Bot(i).Name$ + " est en pieces détachés a cause de "+allie(i).Name$
+endcase
+case 4
+game_console_txtametr$ = allie(i).Name$+" est devenu plieur de tôles"
+endcase
+case 5
+game_console_txtametr$ = Bot(i).Name$ + " n'existe plus"
+endcase
+case 6
+game_console_txtametr$ = allie(i).Name$+" a perforé " + Bot(i).Name$
+endcase
+case 7
+game_console_txtametr$ = Bot(i).Name$ + " a été court-circuité"
+endcase
+case 8
+game_console_txtametr$ = Bot(i).Name$ + " a désormais de quoi jongler"
+endcase
+case 9
+game_console_txtametr$ = allie(i).Name$+" a fragué"
+endcase
+case 10
+game_console_txtametr$ = allie(i).Name$+" est intervenu"
+endcase
+endselect
+inc allie(i).frag
+endif
+inc Bot(i).mort
+Player_stats(0) = Player_stats(0) + (200+ nbsentinelles*1000)
+if Bot(i).tipe = 0
+position object 1001,Bot(i).X#,Bot(i).Y#-tailleperso#,Bot(i).Z#
+endif
+if Bot(i).tipe = 1
+position object 1001,Bot(i).X#,Bot(i).Y#-tailleperso#-60,Bot(i).Z#
+endif
+point object 1001,X#,Bot(i).Y#-tailleperso#+ nbwarmachines*60,Z#
+rotate object 1001,object angle X(1001),object angle Y(1001)+180,object angle Z(1001)
+exclude object off 1001
+play object 1001
+exclude object on Bot(i).objet
+position object Bot(i).objet,9999999,99999999,99999999
+sc_updateobject Bot(i).objet
+Bot(i).Vie = -100000000
+Bot(i).Rspn = 100
+if sound exist(3) = 1
+ delete sound 3
+endif
+set dir CheminMA$+"\Sounds\Voix\Humain\"
+load sound game_frag_human_sound$(rnd(game_frag_human_sound_nb-1)+1),3
+play sound 3
+
+endif
+endif
+rem =============================
+rem =============================
+if Bot(i).Rspn >= 1 and Bot(i).Vie = -100000000
+dec Bot(i).Rspn
+if Bot(i).Rspn = 1
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_droide_nb-1)+1
+Bot(i).x# = game_repawn(2,Game_resppawn_point,1)
+Bot(i).z# = game_repawn(2,Game_resppawn_point,3)
+Bot(i).y# = game_repawn(2,Game_resppawn_point,2)
+endif
+position object Bot(i).objet,Bot(i).X#,Bot(i).Y#,Bot(i).Z#
+if Bot(i).tipe = 1 then position object Bot(i).tete,Bot(i).x#,Bot(i).y#+180,Bot(i).z# : sc_updateobject Bot(i).tete
+exclude object off Bot(i).objet
+if Bot(i).tipe = 0 then Bot(i).Vie = 40
+if Bot(i).tipe = 1 then Bot(i).Vie = 100
+endif
+endif
+
+next i
+allie_meutrieur = 0
+rem ========================================================================================================================
+rem *=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem _.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=*=-._.-=
+rem ========================================================================================================================
+
+
+
+
+if Vie <= 0
+rand = rnd(10)
+New_txt(1,"Vous avez été tué par " + killer_name$,26,255,0,0,screen width()/2,screen height()/2-50,256,256)
+select rand
+case 0
+game_console_txtametr$ = killer_name$ + " est devenu efficace, il a tué "+Configjoueur$
+endcase
+case 1
+game_console_txtametr$ = killer_name$ + " a démontré sa perfection"
+endcase
+case 2
+game_console_txtametr$ = Configjoueur$+" a été saigné"
+endcase
+case 3
+game_console_txtametr$ = Configjoueur$+" a été assaciné"
+endcase
+case 4
+game_console_txtametr$ = "On dirait que " + killer_name$ + " a été débugué"
+endcase
+case 5
+game_console_txtametr$ = killer_name$ + " a recu un patch"
+endcase
+case 6
+game_console_txtametr$ = "Un point de plus pour " + killer_name$
+endcase
+case 7
+game_console_txtametr$ = "Le fusil de " + killer_name$ + " fonctionne"
+endcase
+case 8
+game_console_txtametr$ = Configjoueur$+" s'est fait mathématiquement éradiquer"
+endcase
+case 9
+game_console_txtametr$ = Configjoueur$+" ne se réveillera plus"
+endcase
+case 10
+game_console_txtametr$ = Configjoueur$ +" n'avais pas vus " + killer_name$
+endcase
+endselect
+
+if sound exist(3) = 1 then delete sound 3
+set dir CheminMA$+"\Sounds\Voix\Droides\"
+load sound game_frag_Droide_sound$(rnd(game_frag_Droide_sound_nb-1)+1),3
+play sound 3
+inc mort
+inc Bot(killer_num).frag
+Player_stats(0) = Player_stats(0) +(200+ Bot(killer_num).tipe*1000)
+gosub Etat_Mort
+coef_ralentissement_2# = 1.0
+Vie = 100
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+x# = game_repawn(1,Game_resppawn_point,1)
+z# = game_repawn(1,Game_resppawn_point,3)
+y# = game_repawn(1,Game_resppawn_point,2)
+endif
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100.avi",1
+place animation 1,20,param(36)-95,170,param(36)-20
+loop animation 1
+endif
+
+RHL_PTS = 0
+for t= 0 to Nballies-1
+inc RHL_PTS,Allie(t).frag
+next t
+inc RHL_PTS,frag
+CID_PTS = 0
+for t= 0 to NbBot-1
+inc CID_PTS,Bot(t).frag
+next t
+if RHL_PTS > Fraglimit-1 or CID_PTS > Fraglimit-1 then goto Scores
+return
+
+

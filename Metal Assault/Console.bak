@@ -1,0 +1,40 @@
+
+
+
+Rem *** Include File: Console.dba ***
+Rem Created: 25/02/2008 13:44:05
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+console:
+
+ink rgb(255,255,255),0
+set cursor 0,param(36)-160
+print game_console$(1)
+ink rgb(200,200,200),0
+set cursor 0,param(36)-180
+print game_console$(2)
+ink rgb(150,150,150),0
+set cursor 0,param(36)-200
+print game_console$(3)
+ink rgb(100,100,100),0
+set cursor 0,param(36)-220
+print game_console$(4)
+ink rgb(50,50,50),0
+set cursor 0,param(36)-240
+print game_console$(5)
+ink rgb(255,255,255),0
+
+if game_console_txtametr$ = ""
+else
+game_console$(0)=game_console_txtametr$
+game_console_txtametr$ = ""
+for t=1 to 15
+game_console$(16-t)=game_console$(15-t)
+next t
+endif
+
+if keystate(param(56)) = 1 then game_console_inputmsg = 1
+if game_console_inputmsg = 1 then game_console_txtametr$ = pseudo_input(300,24,">>:",250)
+if keystate(28) = 1 then game_console_inputmsg = 0 : cls
+
+return

@@ -1,0 +1,100 @@
+Rem *** Include File: Multi_Profil.dba ***
+Rem Created: 14/02/2009 07:52:52
+
+Rem Included in Project: G:\Metal Assault\Metal Assault.dbpro
+Rem *** Include File: Multi_Rejoindre.dba ***
+Rem Created: 19/04/2008 17:27:19
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Multi_Profil:
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+set image colorkey 0,252,0
+load image "Profil.jpg",4,1
+
+
+
+do
+   rem l'extrapolation
+   NewExtrapolationTimer=timer()
+   Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+   print Extrapolation
+   OldExtrapolationTimer=NewExtrapolationTimer
+   rem le boutton retour
+   if boutton2(0,680,166,768)
+      delete image 4
+      show sprite 1
+      show sprite 2
+      set image colorkey 0,0,0
+      wait 300
+      goto menu_base:
+   endif
+   rem le boutton reset
+   if boutton2(856,680,1024,768)
+      for i = 1 to 10
+         Player_stats(0+i) = 0
+      next i
+   endif
+   rem l'affichage
+   rem le profil
+   paste image 4,0,0,4
+   set cursor 0,0
+
+   set cursor 110,133
+   print Configjoueur$
+   if boutton2(106,132,338,157)
+      clear entry buffer
+      repeat
+      newnom$= entry$()
+      until returnkey()
+      break
+      set dir CheminMA$+"\Configs"
+      MAKE DIRECTORY newnom$
+      copy file CheminMA$+"\Configs\"+Configjoueur$+"\keymap.txt",CheminMA$+"\Configs\"+newnom$+"\keymap.txt"
+      copy file CheminMA$+"\Configs\"+Configjoueur$+"\param.txt",CheminMA$+"\Configs\"+newnom$+"\param.txt"
+      copy file CheminMA$+"\Configs\"+Configjoueur$+"\Stats.txt",CheminMA$+"\Configs\"+newnom$+"\Stats.txt"
+      delete file  CheminMA$+"\Configs\"+Configjoueur$+"\param.txt"
+      delete file  CheminMA$+"\Configs\"+Configjoueur$+"\Stats.txt"
+      delete file  CheminMA$+"\Configs\"+Configjoueur$+"\keymap.txt"
+      delete directory CheminMA$+"\Configs\"+Configjoueur$
+      set dir CheminMA$+"\Configs"
+      open to read 1,"index.ini"
+      read string 1,config_nblignes$
+      config_nblignes = val(config_nblignes$)
+      for i = 0 to config_nblignes-1
+      read string 1,temp$
+      Config_listeprofil$(i) = temp$
+      next i
+      close file 1
+      for i = 0 to config_nblignes-1
+      if Config_listeprofil$(i) = Configjoueur$ then Config_listeprofil$(i) = newnom$ : exit
+      next i
+      delete file "index.ini"
+      open to write 1,"index.ini"
+      write string 1,str$(config_nblignes)
+      for i = 0 to config_nblignes-1
+      temp$ = Config_listeprofil$(i)
+      write string 1,temp$
+      next i
+      close file 1
+      Configjoueur$ = newnom$
+      set dir CheminMA$
+      delete file "Metal Assault.ini"
+      open to write 1,"Metal Assault.ini"
+      write string 1,Configjoueur$
+      write string 1,Lireintro$
+      close file 1
+   endif
+   set cursor 290,168
+   print "X"
+   set cursor 88,204
+   print 0
+
+
+   rem les stats
+   set cursor 746,270
+   print Player_stats(1)
+loop
+
+

@@ -1,0 +1,641 @@
+Rem *** Include File: Game_Chargement.dba ***
+Rem Created: 09/12/2007 09:49:21
+
+Rem Included in Project: D:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+rem =========================================================================================================================
+rem ============================================== Chargement du jeu ========================================================
+rem =========================================================================================================================
+
+load_game:
+rem le système
+set text font "time new roman",1
+set camera range 10,50000
+set text size 12
+Autocam Off
+Color Backdrop Rgb( 0, 0, 0 )
+
+
+
+rem on détruit les anciennes imagesstop object 1
+delete object 1
+delete sprite 4
+delete image 4
+delete sprite 5
+delete image 5
+delete sprite 6
+delete image 7
+delete sprite 7
+delete image 8
+cls
+
+
+rem l'ecran de chargement
+set dir CheminMA$+"\Jpegs\Menu"
+set image colorkey 255,0,0
+load image "Chargement.jpg",4
+set image colorkey 0,0,0
+sprite 4,0,0,4
+size sprite 4,param(35),param(36)
+hide sprite 4
+wait 1
+
+rem les armes et le shopping
+game_arme_a_charger = 1
+dim game_arme_embaquee(100)
+gosub market
+gosub Config_arme
+
+rem on montre l'ecran de chargement
+show sprite 4
+wait 1
+
+
+rem les armes
+for t = 0 to 100
+if game_arme_embaquee(t) = 1
+set dir CheminMA$+"\Models\Armes\"+listarme(t).name$
+load object listarme(t).name$+".X",t+1000
+disable object zdepth t+1000
+loop object t+1000,0,30
+set object speed t+1000,60
+load image "Reticule.tga",t+1000,1
+load sound "Fire.WAV",t+1000
+exclude object on t+1000
+inc nb_arme
+endif
+next t
+
+
+rem la coresspondance enre n° d'arme et objet d'arme
+dim game_arme_coress(nb_arme)
+i= 0
+   for t= 0 to 100
+      if game_arme_embaquee(t) = 1 then game_arme_coress(i) = 1000 + t : inc i : listarme(t).Bulets_encour = listarme(t).BuletsparChargeur : listarme(t).Bulets_Stock =  listarme(t).BuletsparChargeur* listarme(t).Chargeur_start
+   next t
+arme  = nb_arme-1
+
+rem les lazers, silencieux et companies
+
+num = 1400
+if Glock_17_Silencieux = 1
+set dir CheminMA$+"\Models\Armes\Glock 17"
+load object "Silencieux.x",num
+disable object zdepth num
+load sound "Silencieux.wav",num
+Glock_17_Silencieux = num
+inc num
+endif
+if Famas_Silencieux = 1
+set dir CheminMA$+"\Models\Armes\Famas G2"
+load object "Silencieux.x",num
+disable object zdepth num
+load sound "Silencieux.wav",num
+Famas_Silencieux = num
+inc num
+endif
+if Famas_Lazer = 1
+set dir CheminMA$+"\Models\Armes\Famas G2"
+load object "Lazer.x",num
+disable object zdepth num
+set dir CheminMA$+"\Jpegs\Jeu\"
+load image "lazer.tga",num
+Famas_Lazer = num
+inc num
+endif
+if Famas_ACOG = 1
+set dir CheminMA$+"\Models\Armes\Famas G2"
+load object "ACOG.x",num
+disable object zdepth num
+Famas_ACOG = num
+inc num
+endif
+if Famas_Vlourd = 1
+listarme(40).Bulets_encour = 90
+listarme(40).BuletsparChargeur = 90
+listarme(40).Chargeur_start = 7
+set dir CheminMA$+"\Models\Armes\Famas G2"
+load object "Vlourd.x",num
+disable object zdepth num
+Famas_Vlourd = num
+inc num
+endif
+if Ak_74_Silencieux = 1
+set dir CheminMA$+"\Models\Armes\Kalachnikov AK-74"
+load object "Silencieux.x",num
+disable object zdepth num
+load sound "Silencieux.wav",num
+Ak_74_Silencieux = num
+inc num
+endif
+if AK_74_Lazer = 1
+set dir CheminMA$+"\Jpegs\Jeu\"
+load image "lazer.tga",num
+AK_74_Lazer = num
+endif
+if CsniperR_Silencieux = 1
+set dir CheminMA$+"\Models\Armes\Classical Sniper-rifle"
+load object "Silencieux.x",num
+disable object zdepth num
+load sound "Silencieux.wav",num
+CsniperR_Silencieux = num
+inc num
+endif
+
+rem intialisation du zoom
+zoom = 60
+dessomee = 1
+
+rem initialisation du moteur de physique
+global radius# as double float : radius# = 20.0 : rem la ditance minimale entre le perso et un murrem a laisser vide pour éviter les bugs de la gravitée (c'est la faute de DBP)
+global tailleperso# as double float : tailleperso# = 80 : rem 100 fait environ 2m
+global genouperso# as double float : genouperso# = 35
+global gravite# as float : gravite# = 9
+make object sphere 2,radius#
+position object 2,-80,15,-20
+sc_setupObject 2,0,1
+hide object 2
+disable object zwrite 2
+make object sphere 3,radius#/5
+position object 3,-80,5,-20
+sc_setupObject 3,0,1
+hide object 3
+disable object zwrite 3
+make object sphere 4,radius#/2
+position object 4,-80,15,-20
+sc_setupObject 4,0,1
+hide object 4
+disable object zwrite 4
+
+
+rem On charge la carte
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+if file exist (game_carte$+".dbo") = 0
+load object game_carte$+".x",1
+else
+load object game_carte$+".dbo",1
+endif
+sc_setupComplexObject 1,1,2
+set object transparency 1,4
+set object 1,1,1,1
+set object light 1,0
+set normalization on
+
+rem pour le déplacement
+coef_ralentissement = 1
+coef_ralentissement_2# = 1
+
+rem et les points de respawn
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+if file exist ("RespawnH.ini") = 1 and file exist ("RespawnD.ini") = 1
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+open to read 1,"RespawnH.ini"
+read string 1,game_repawn_point_human_nb$
+if left$(game_repawn_point_human_nb$,1) = "-"
+game_repawn_point_human_nb = val(right$(game_repawn_point_human_nb$,len(game_repawn_point_human_nb$)))*-1
+else
+game_repawn_point_human_nb = val(game_repawn_point_human_nb$)
+endif
+close file 1
+open to read 1,"RespawnD.ini"
+read string 1,game_repawn_point_droide_nb$
+if left$(game_repawn_point_droide_nb$,1) = "-"
+game_repawn_point_droide_nb = val(right$(game_repawn_point_droide_nb$,len(game_repawn_point_droide_nb$)))*-1
+else
+game_repawn_point_droide_nb = val(game_repawn_point_droide_nb$)
+endif
+close file 1
+dim game_repawn(2,game_repawn_point_human_nb + game_repawn_point_droide_nb,3)
+open to read 1,"RespawnH.ini"
+read string 1,temp$
+for t = 1 to game_repawn_point_human_nb
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(1,t,1) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(1,t,1) = val(temp$)
+endif
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(1,t,2) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(1,t,2) = val(temp$)
+endif
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(1,t,3) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(1,t,3) = val(temp$)
+endif
+next t
+close file 1
+open to read 1,"RespawnD.ini"
+read string 1,temp$
+for t = 1 to game_repawn_point_droide_nb
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(2,t,1) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(2,t,1) = val(temp$)
+endif
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(2,t,2) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(2,t,2) = val(temp$)
+endif
+read string 1,temp$
+if left$(temp$,1) = "-"
+game_repawn(2,t,3) = val(right$(temp$,len(temp$)-1))*-1
+else
+game_repawn(2,t,3) = val(temp$)
+endif
+next t
+close file 1
+endif
+
+
+rem le ciel
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+make object sphere 5,100,15,60
+scale object 5,-2500,-2500,-2500
+load image "sky.jpg",10,1
+texture object 5,10
+rotate object 5,180,140,0
+fix object pivot 5
+set object light 5,0
+sc_setupobject 5,5,0
+sc_allowobjectscaling 5
+
+Rem Les muns reloaders
+if file open(1) =1 then close file 1
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+if file exist(game_carte$+".ini")
+set dir CheminMA$+"\Models\"
+load object "Muns.x",1257
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$
+open to read 1,game_carte$+".ini"
+repeat
+read string 1,temp$
+if temp$ = "[Muns Pos]"
+read string 1,temp$
+Xmuns# = val(temp$)
+read string 1,temp$
+Ymuns# = val(temp$)
+read string 1,temp$
+Zmuns# = val(temp$)
+endif
+until file end (1) = 1
+close file 1
+position object 1257,Xmuns#,Ymuns#,Zmuns#
+endif
+
+
+rem les roquettes
+set dir CheminMA$+"\Models\Armes\Double Lance Roquette\"
+dim Game_roket_tir(60)
+dim Game_roket_life(60)
+Game_roket_select = 1102
+Game_biroket_select = 1132
+for t=1100 to 1130
+load object "Roquette.x",t
+exclude object on t
+sc_setupobject t,0,2
+next
+for t=1131 to 1160
+load object "BiRoquette.x",t
+loop object t,0,20
+exclude object on t
+sc_setupobject t,0,2
+next
+
+rem les balles du DCA
+dim Game_DCA_ballife(10)
+for t  = 1161 to 1170
+make object sphere t,10
+ghost object on t
+sc_setupobject t,t,0
+hide object t
+next t
+
+rem les sons
+set dir CheminMA$+"\Sounds\"
+rem sons 3 pris par le son de FRAG\mort
+load sound "Droide_hit.wav",4
+
+
+rem les images (réticule,entre autre)
+set dir CheminMA$+"\Jpegs\Jeu"
+load image "Snipe.tga",14
+sprite 14,10000,100000,14
+
+
+rem l'exploison
+set dir CheminMA$+"\Models\"
+load object "Explosion.X",1001
+set object speed 1001,100
+set object interpolation 1001,100
+exclude object on 1001
+
+
+rem le témoin d'ipact sur le joueur
+make object cube 1002,50
+sc_setupobject 1002,0,2
+hide object 1002
+
+
+rem les sons de frag
+set dir CheminMA$+"\Sounds\Voix\Droides\"
+if file exist ("index.ini") = 1
+open to read 1,"index.ini"
+read file 1,game_frag_droide_sound_nb
+dim game_frag_droide_sound$(game_frag_droide_sound_nb)
+for t = 1 to game_frag_droide_sound_nb
+read string 1,temp$
+game_frag_droide_sound$(t) = temp$
+next t
+close file 1
+endif
+
+rem les sons de mort
+set dir CheminMA$+"\Sounds\Voix\Humain\"
+if file exist ("index.ini") = 1
+open to read 1,"index.ini"
+read file 1,game_frag_human_sound_nb
+dim game_frag_human_sound$(game_frag_human_sound_nb)
+for t = 1 to game_frag_human_sound_nb
+read string 1,temp$
+game_frag_human_sound$(t) = temp$
+next t
+close file 1
+endif
+
+rem les droïdes
+set dir CheminMA$+"\Models\"
+for t = 0 to nbwarmachines-1
+Bot(t).tipe = 0
+next t
+for t = nbwarmachines to nbsentinelles-1+nbwarmachines
+Bot(t).tipe = 1
+next t
+Droide_objet_suivant = 5000
+for t = 0 to NbBot-1
+if Bot(t).tipe = 0
+   temp = rnd(1)
+   if temp = 0
+   load object "Warmachine.X",Droide_objet_suivant
+   rotate object Droide_objet_suivant,-90,0,0
+   fix object pivot Droide_objet_suivant
+   else
+   load object "Warmachine2.X",Droide_objet_suivant
+   rotate object Droide_objet_suivant,-90,0,0
+   fix object pivot Droide_objet_suivant
+   endif
+   Bot(t).name$ = "Wm"+str$(rnd(1000000))
+   Bot(t).Vie = 40
+   Bot(t).objet = Droide_objet_suivant
+   Bot(t).tete = Droide_objet_suivant
+   sc_setupobject Bot(t).objet,0,1
+endif
+if Bot(t).tipe = 1
+   temp = rnd(1)
+   if temp = 0
+   load object "Sentinelle.x",Droide_objet_suivant
+   set object speed Droide_objet_suivant,30
+   else
+   load object "Sentinelle2.x",Droide_objet_suivant
+   rotate object Droide_objet_suivant,-90,180,0
+   fix object pivot Droide_objet_suivant
+   endif
+   Bot(t).name$ = "St"+str$(rnd(1000000))
+   Bot(t).Vie = 100
+   Bot(t).objet = Droide_objet_suivant
+   Bot(t).tete = Droide_objet_suivant+1
+   make object sphere Droide_objet_suivant+1,40
+   hide object Droide_objet_suivant+1
+   sc_setupobject Bot(t).objet+1,0,1
+   sc_setupobject Bot(t).objet,0,1
+endif
+   exclude object on Droide_objet_suivant
+   loop object Droide_objet_suivant
+   sc_setupComplexObject Droide_objet_suivant,2,2
+   if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+      Bot(t).respawn_pt = rnd(game_repawn_point_droide_nb-1)+1
+      Bot(t).X# = game_repawn(2,Game_resppawn_point,1)
+      Bot(t).Z# = game_repawn(2,Game_resppawn_point,3)
+      Bot(t).Y# = game_repawn(2,Game_resppawn_point,2)
+   endif
+   inc Droide_objet_suivant,2
+   Bot(t).cible = rnd(nballies)
+next t
+
+
+rem les tirs de droides
+set dir CheminMA$+"\Sounds"
+load sound "Snipe_tir.wav",1103
+
+rem les alliés
+objet_humain_suivant = 12000
+for t= 0 to nballies-1
+set dir CheminMA$+"\Models\Human"
+load object "Soldier.x",objet_humain_suivant+t
+set object speed objet_humain_suivant+t,50
+rotate object objet_humain_suivant+t,0,180,0
+fix object pivot objet_humain_suivant+t
+loop object objet_humain_suivant+t,516,595
+scale object objet_humain_suivant+t,7500,7500,7500
+allie(t).name$ = nomhumain$(rnd(40))
+allie(t).Vie = 100
+allie(t).objet = objet_humain_suivant+t
+sc_setupobject objet_humain_suivant+t,0,0
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+allie(t).x# = game_repawn(1,Game_resppawn_point,1)
+allie(t).z# = game_repawn(1,Game_resppawn_point,3)
+allie(t).y# = game_repawn(1,Game_resppawn_point,2)
+endif
+position object objet_humain_suivant+t,allie(t).x#,allie(t).y#,allie(t).z#
+point object objet_humain_suivant+t,0,allie(t).y#,0
+repeat
+allie(t).cible = rnd(Nbbot-1)
+until Bot(allie(t).cible).Vie > 0
+next t
+
+
+rem l'EC
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 100.avi",1
+place animation 1,0,0,0,0
+
+rem la console
+dim game_console$(5)
+dim game_console_time(5)
+
+rem le sang sur l'ecran quand on est mort et les autres images
+set dir CheminMA$+"\Jpegs\jeu"
+load image "Small Score.jpg",17
+load image "Dammage_warn.tga",18
+sprite 18,0,0,18
+size sprite 18,param(35),param(36)
+hide sprite 18
+load image "Muns.jpg",19
+load image "acog.tga",20
+set dir CheminMA$+"\Models\Armes\"+listarme(40).name$
+if game_arme_embaquee(40) = 1 then load image "mire.bmp",21
+set dir CheminMA$+"\Models\Armes\"+listarme(41).name$
+if game_arme_embaquee(41) = 1 then load image "mire.bmp",22
+set dir CheminMA$+"\Jpegs\jeu\ATH"
+set image colorkey 0,0,0
+if armure_type = 4 then load image "Lourde.jpg",23
+if armure_type = 5 then load image "Ultra Lourde.jpg",23
+rem 256 ==> 512 prises par les Txt pricipaux
+
+rem le bouboules du mode domination
+if type_game$="Domination"
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("dom.ini") = 1
+open to read 1,"dom.ini"
+read float 1,game_dompts#
+game_dompts = int(game_dompts#)
+for t= 0 to game_dompts#
+read file 1,temp
+Solo_dompts(t,1) = temp
+read file 1,temp
+Solo_dompts(t,2) = temp
+read file 1,temp
+Solo_dompts(t,3) = temp
+make object sphere t+1200,160,20,20
+position object t+1200,Solo_dompts(t,1),Solo_dompts(t,2),Solo_dompts(t,3)
+sc_setupobject t+1200,1200,0
+next t
+close file 1
+endif
+endif
+Solo_iadom_cible_ateinte = 1
+
+rem diverses tableaux
+dim Goliaths(100) as Goliath
+
+rem lecture de l'eventuel script de la carte
+gosub Solo_Script_lecture
+
+rem les Goliaths
+set dir CheminMA$+"\Models\Tourelles\Goliath\"
+load object "MunG.x",8000
+Goliath_bal_en_cour = 8000
+Goliath_nb_bal = 1
+for t = 0 to nb_Goliath-1
+load object "Goliath.x",t+1281
+position object t+1281,Goliaths(t).x,Goliaths(t).y,Goliaths(t).z
+yrotate object t+1281,180
+fix object pivot t+1281
+point object t+1281,0,object position Y(t+1281),0
+sc_setupobject t+1281,t+1281,0
+for a=  1 to 20
+for g = 1 to 8
+clone object Goliath_nb_bal+8000,8000
+set object Goliath_nb_bal+8000,1,1,0
+set object light Goliath_nb_bal+8000,0
+zrotate object Goliath_nb_bal+8000,45*g
+fix object pivot Goliath_nb_bal+8000
+sc_setupobject Goliath_nb_bal+8000,Goliath_nb_bal+8000,0
+position object Goliath_nb_bal+8000,0,90000000,0
+hide object Goliath_nb_bal+8000
+inc Goliath_nb_bal
+next g
+next a
+next t
+dim Goliath_bal_life(Goliath_nb_bal)
+load sound "start.wav",8000
+load sound "fire.wav",8001
+load sound "end.wav",8002
+
+rem initialisation du flou
+game_flou = 255
+
+
+rem la vie
+vie = 100
+
+rem on est en mode FPS
+gameplay_Type = 1
+
+rem on enlève l'écran de chargement, la souris et on lance le jeu (très loin !!)
+delete sprite 4
+delete image 4
+hide mouse
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+x# = game_repawn(1,Game_resppawn_point,1)
+z# = game_repawn(1,Game_resppawn_point,3)
+y# = game_repawn(1,Game_resppawn_point,2)
+endif
+position camera x#,y#,z#
+goto Exploration
+
+rem =========================================================================================================================
+rem ============================================== Lancement du jeu  ========================================================
+rem =========================================================================================================================
+rem ===================================== Transition de l'exploration vers le jeu ===========================================
+rem =========================================================================================================================
+
+Game_trans:
+rem position de départ
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+x# = game_repawn(1,Game_resppawn_point,1)
+z# = game_repawn(1,Game_resppawn_point,3)
+y# = game_repawn(1,Game_resppawn_point,2)
+endif
+position object 3,x#,y#,z#
+position camera object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 2,object position x(3),object position y(3)+tailleperso#,object position z(3)
+position object 4,object position x(3),object position y(3)+genouperso#,object position z(3)
+position object game_arme_coress(arme),object position x(3),object position y(3)+tailleperso#,object position z(3)
+
+rem la musique
+set dir CheminMA$+"\Musiques\Combat"
+stop music 1
+delete music 1
+open to read 1,"index.ini"
+read float 1,game_nb_baston_zik#
+game_nb_baston_zik = int(game_nb_baston_zik#)
+for t = 0 to game_nb_baston_zik
+read string 1,zikname$(t)
+next t
+load music zikname$(rnd(game_nb_baston_zik-1)),1
+loop music 1
+set music volume 1,70
+
+ rem l'IA
+for t = 0 to NbBot-1
+exclude object off Bot(t).objet
+next t
+for t = 0 to nballies-1
+exclude object off 12000+t
+next t
+
+rem l'EC
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+
+set text font "time new roman",1
+set camera range 10,50000
+set text size 12
+draw sprites first
+
+time = timer()
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist ("respawnH.ini") = 1 and file exist ("respawnD.ini") = 1
+Game_resppawn_point = rnd(game_repawn_point_human_nb-1)+1
+x# = game_repawn(1,Game_resppawn_point,1)
+z# = game_repawn(1,Game_resppawn_point,3)
+y# = game_repawn(1,Game_resppawn_point,2)
+endif
+
+exclude object off game_arme_coress(arme)
+goto Game
+

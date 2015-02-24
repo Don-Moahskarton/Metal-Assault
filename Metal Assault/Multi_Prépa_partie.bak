@@ -1,0 +1,1880 @@
+
+Rem *** Include File: Multi_Prépa_partie.dba ***
+Rem Created: 17/02/2009 07:58:24
+
+Rem Included in Project: G:\Metal Assault\Metal Assault.dbpro
+Multi_prepa_partie:
+type_game$="Match_mort"
+rem config default
+nbsentinelles = 0
+nbwarmachines = 0
+Fraglimit = 25
+
+for t = 10 to 80
+   game_arme_embaquee(t)=0
+next t
+
+if Menu_SRV = 1
+   temp = Net Host( MAXIMUM_PLAYERS )
+      If Not temp
+        game_console$(0) = "Impossible de démarrer le server: " + Chr$( 34 ) + Net Get Error( ) + Chr$( 34 ) + "."
+      Else
+         game_console$(0) = "Serveur créé avec succès."
+      Endif
+    game_console$(1) = "L'ip internet du serveur est :"+ GetMyIP()
+  game_console$(2) = "L'ip locale du serveur est :"+ GetLocalIP()
+   Multi_Your_no = 0
+   joueurs(multi_Your_no).name$ = Configjoueur$
+   Multi_nb_player = 1
+
+endif
+
+Multi_prepa_partie_boucle:
+set dir CheminMA$+"\jpegs\menu"
+hide sprite 1
+hide sprite 2
+clear entry buffer
+if image exist(4) then delete image 4
+load image "Lancement partie Multi.jpg",4,1
+
+rem le bloc d'initialisation qui suit est a reopier a l'identique après chaque sous menu (selection de carte, ....)
+set image colorkey 0,252,0
+set text font "arial",1
+set text size 16
+set text to normal
+Multi_prepa_perso_select$ = joueurs(your_no).name$
+Multi_prepa_perso_select = multi_your_no
+
+
+do
+set cursor 0,0
+paste image 4,0,0
+gosub Multi_prepa_partie_netpass
+
+rem quitter
+if boutton2(0,728,165,768)
+   do
+   paste image 4,0,0
+   if mouseclick() = 0 then exit
+   loop
+   delete image 4
+   if image exist(5) then delete image 5
+   if image exist(6) then delete image 6
+   if image exist(7) then delete image 7
+   if image exist(8) then delete image 8
+   show sprite 1
+   show sprite 2
+   set image colorkey 0,0,0
+   Multi_prepa_pano = 0
+   Multi_prepa_pano_Cjoueur = 0
+   Multi_prepa_pano_Cjoueur_arme_cat = 0
+   Multi_prepa_pano_arme_prix = 0
+   Multi_prepa_pano_arme_poid = 0
+   goto menu_base:
+endif
+
+rem affichage
+set cursor 897,102
+print "Deathmatch"
+
+set cursor 837,132
+print game_carte$
+
+set cursor 872,158
+print nballies
+
+set cursor 872,188
+print str$(nbsentinelles)+"St | "+str$(nbwarmachines)+"Wm"
+
+set cursor 934,216
+print Fraglimit
+
+set cursor 905,244
+print "Infini"
+
+set cursor 910,274
+print "2"
+
+set cursor 913,303
+print "128"
+
+rem le boutton de configuration du joueur
+if boutton2(688,0,850,80)
+   if Multi_prepa_pano = 0
+      Multi_prepa_pano = 1
+      set dir CheminMA$+"\jpegs\menu"
+      load image "Choix Faction.jpg",5
+      Multi_prepa_pano_Cjoueur = 1
+   endif
+endif
+
+rem Le boutton Config partie
+if boutton2(850,0,1024,80)
+   if Menu_SRV = 1
+      goto multi_prepa_partie_config
+      set image colorkey 0,252,0
+      set text font "arial",1
+      set text to normal
+      set text size 16
+      Multi_prepa_perso_select$ = joueurs(your_no).name$
+      Multi_prepa_perso_select = multi_your_no
+      rem important de tout metre a jour....
+      Multi_info_partie_asend = 1
+   else
+      set dir CheminMA$+"\jpegs\menu"
+      load image "Msgbox Client.jpg",15
+      do
+         paste image 4,0,0
+         paste image 15,300,300
+         if boutton2(380,390,470,415) then exit
+      loop
+      delete image 15
+   endif
+endif
+
+rem ===============================
+rem La boite de sélection du joueur
+rem ===============================
+rem boutton de déroulement
+if boutton2(279,40,299,67)
+   Multi_prepa_taille_box = 65+Multi_nb_player*25
+endif
+rem sélection du joueur
+if Multi_prepa_taille_box > 0 and survol(40,40,299,Multi_prepa_taille_box)
+   Multi_prepa_box_persoselect_flag = 0
+   for t=0 to Multi_nb_player
+      if survol(40,65+t*25,299,65+(t+1)*25)
+      Multi_prepa_box_persoselect = t
+      Multi_prepa_box_persoselect_flag = 1
+      endif
+   next t
+else
+   Multi_prepa_taille_box = 0
+endif
+rem affichage
+set cursor 44,43
+print joueurs(Multi_prepa_box_persoselect).name$
+if Multi_prepa_taille_box > 0
+  box 40,65,277,Multi_prepa_taille_box
+  if Multi_prepa_box_persoselect_flag = 1
+      ink rgb(128,128,128),0
+      box 40,65+(Multi_prepa_box_persoselect)*25,277,65 + (Multi_prepa_box_persoselect+1)*25
+      ink rgb(255,255,255),0
+  endif
+  ink 0,0
+  for t= 1 to Multi_nb_player
+  set cursor 44,45+t*25
+  print joueurs(t-1).name$
+  next t
+  ink rgb(255,255,255),0
+endif
+
+remstart
+rem ===================================================================
+rem ================== Le Panneau Polyvalant
+rem ===================================================================
+Les Alias:
+Multi_prepa_pano = 0 Vide, bleu, rien, enfin, tout sa quoi
+Multi_prepa_pano = 1 configuration du joueur de l'ordi
+remend
+select Multi_prepa_pano
+   case 0
+   endcase
+   case 1
+
+      if Multi_prepa_pano_Cjoueur <> 3 and Multi_prepa_pano_Cjoueur <> 4
+         paste image 5,282,100
+      else
+         if Multi_prepa_pano_Cjoueur = 3
+            paste image 7,616,733,1
+            if Multi_prepa_pano_Cjoueur_arme_cat = 0
+               for t= 0 to 8
+                  paste image 5,282,100+30*t
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258
+               print "Lourd"
+               set cursor 466,288
+               print "Snipe"
+               set cursor 466,318
+               print "Spécial"
+               set cursor 466,348
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 1
+               paste image 5,282,100
+               for t= 1 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat10
+               next t
+               for t =1 to Armes_count_cat10
+                  set cursor 466,108+30*t
+                  print listarme(9+t).name$
+                  if game_arme_embaquee(9+t) = 1 then paste image 6,282,130+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138+30*Armes_count_cat10
+               print "Automatiques"
+               set cursor 466,168+30*Armes_count_cat10
+               print "A pompe"
+               set cursor 466,198+30*Armes_count_cat10
+               print "Fusils d'Assault"
+               set cursor 466,228+30*Armes_count_cat10
+               print "Miniguns"
+               set cursor 466,258+30*Armes_count_cat10
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat10
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat10
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat10
+               print "A main"
+               set cursor 290,716
+                print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 2
+               paste image 5,282,100
+               paste image 5,282,130
+               for t= 2 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat20
+               next t
+               for t =1 to Armes_count_cat20
+                  set cursor 466,138+30*t
+                  print listarme(19+t).name$
+                  if game_arme_embaquee(19+t) = 1 then paste image 6,282,160+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168+30*Armes_count_cat20
+               print "A pompe"
+               set cursor 466,198+30*Armes_count_cat20
+               print "Fusils d'Assault"
+               set cursor 466,228+30*Armes_count_cat20
+               print "Miniguns"
+               set cursor 466,258+30*Armes_count_cat20
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat20
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat20
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat20
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 3
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               for t= 3 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat30
+               next t
+               for t =1 to Armes_count_cat30
+                  set cursor 466,168+30*t
+                  print listarme(29+t).name$
+                  if game_arme_embaquee(29+t) = 1 then paste image 6,282,190+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198+30*Armes_count_cat30
+               print "Fusils d'Assault"
+               set cursor 466,228+30*Armes_count_cat30
+               print "Miniguns"
+               set cursor 466,258+30*Armes_count_cat30
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat30
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat30
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat30
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 4
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               for t= 4 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat40
+               next t
+               for t =1 to Armes_count_cat40
+                  set cursor 466,198+30*t
+                  print listarme(39+t).name$
+                  if game_arme_embaquee(39+t) = 1 then paste image 6,282,220+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228+30*Armes_count_cat40
+               print "Miniguns"
+               set cursor 466,258+30*Armes_count_cat40
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat40
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat40
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat40
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 5
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               paste image 5,282,220
+               for t= 5 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat50
+               next t
+               for t =1 to Armes_count_cat50
+                  set cursor 466,228+30*t
+                  print listarme(49+t).name$
+                  if game_arme_embaquee(49+t) = 1 then paste image 6,282,250+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258+30*Armes_count_cat50
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat50
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat50
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat50
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 6
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               paste image 5,282,220
+               paste image 5,282,250
+               for t= 6 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat60
+               next t
+               for t =1 to Armes_count_cat60
+                  set cursor 466,258+30*t
+                  print listarme(59+t).name$
+                  if game_arme_embaquee(59+t) = 1 then paste image 6,282,280+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258
+               print "Lourd"
+               set cursor 466,288+30*Armes_count_cat60
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat60
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat60
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 7
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               paste image 5,282,220
+               paste image 5,282,250
+               paste image 5,282,280
+               for t= 7 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat70
+               next t
+               for t =1 to Armes_count_cat70
+                  set cursor 466,288+30*t
+                  print listarme(69+t).name$
+                  if game_arme_embaquee(69+t) = 1 then paste image 6,282,310+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258
+               print "Lourd"
+               set cursor 466,288
+               print "Snipe"
+               set cursor 466,318+30*Armes_count_cat70
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat70
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 8
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               paste image 5,282,220
+               paste image 5,282,250
+               paste image 5,282,280
+               paste image 5,282,310
+               for t= 8 to 8
+                  paste image 5,282,100+30*t+30*Armes_count_cat80
+               next t
+               for t =1 to Armes_count_cat80
+                  set cursor 466,318+30*t
+                  print listarme(79+t).name$
+                  if game_arme_embaquee(79+t) = 1 then paste image 6,282,340+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258
+               print "Lourd"
+               set cursor 466,288
+               print "Snipe"
+               set cursor 466,318
+               print "Spécial"
+               set cursor 466,348+30*Armes_count_cat80
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 9
+               paste image 5,282,100
+               paste image 5,282,130
+               paste image 5,282,160
+               paste image 5,282,190
+               paste image 5,282,220
+               paste image 5,282,250
+               paste image 5,282,280
+               paste image 5,282,310
+               paste image 5,282,340
+               for t =1 to Armes_count_cat90
+                  set cursor 466,348+30*t
+                  print listarme(89+t).name$
+                  if game_arme_embaquee(89+t) = 1 then paste image 6,282,370+30*(t-1),1
+               next t
+               set cursor 466,108
+               print "Pistolets"
+               set cursor 466,138
+               print "Automatiques"
+               set cursor 466,168
+               print "A pompe"
+               set cursor 466,198
+               print "Fusils d'Assault"
+               set cursor 466,228
+               print "Miniguns"
+               set cursor 466,258
+               print "Lourd"
+               set cursor 466,288
+               print "Snipe"
+               set cursor 466,318
+               print "Spécial"
+               set cursor 466,348
+               print "A main"
+               set cursor 290,716
+               print "Solde : ",Solde," €                               Prix de cette arme : ",Multi_prepa_pano_arme_prix," €"
+               set cursor 290,732
+               print "Capacitée : ",Game_armure_force-poid_achat,"Kg                  Poid de cette arme :",Multi_prepa_pano_arme_poid," Kg"
+            endif
+         endif
+rem ========================================================================================================================
+rem ========================================================================================================================
+rem ========================================================================================================================rem ========================================================================================================================
+rem ========================================================================================================================
+rem ========================================================================================================================
+rem ========================================================================================================================
+rem ========================================================================================================================
+rem ========================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         if Multi_prepa_pano_Cjoueur = 4
+            rem Choix des accesoires des armes  Armes_conf_panneau(Armes_count)
+            paste image 5,282,100
+            Armes_conf_panneau(0,1) = 100
+            i=0
+               for t = 0 to Armes_achtee_count-1
+                  if t<>0
+                     if Armes_conf_panneau(t-1,0) = 0
+                        Armes_conf_panneau(t,1) = Armes_conf_panneau(t-1,1)+30
+                     else
+                           Armes_conf_panneau(t,1) = Armes_conf_panneau(t-1,1)+30 + Armes_conf_panneau_nbaccesoir(Armes_conf_panneau(t-1,2))*30
+                     endif
+                  else
+                     armes_conf_panneau(0,1) = 100
+                  endif
+                  paste image 6,282,Armes_conf_panneau(t,1)
+                  if Armes_conf_panneau(t,0) = 1 and Armes_conf_panneau_nbaccesoir(Armes_conf_panneau(t,2)) > 0
+                     for j = 1 to Armes_conf_panneau_nbaccesoir(Armes_conf_panneau(t,2))
+                        Set cursor 466,Armes_conf_panneau(t,1)+j*30
+                        print Armes_conf_panneau_STR(i+j)
+                     next j
+                  inc i,Armes_conf_panneau_nbaccesoir(Armes_conf_panneau(t,2))
+                  endif
+               next t
+
+
+            i=0
+            for t = 10 to 80 : rem nombre d'index des armes (=100)
+               if game_arme_embaquee(t)=1
+                 set cursor 466,Armes_conf_panneau(i,1)+8
+                 print listarme(t).name$
+                 inc i
+               endif
+            next t
+         endif
+      endif
+
+      select Multi_prepa_pano_Cjoueur
+         case 1
+            if boutton2(326,126,713,344)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               joueurs(Multi_Your_no).faction = 0
+               Multi_prepa_pano_Cjoueur = 2
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArmure.jpg",5
+            endif
+            if boutton2(326,497,713,768)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               joueurs(Multi_Your_no).faction = 1
+               Multi_prepa_pano_Cjoueur = 2
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArmure.jpg",5
+            endif
+         endcase
+         case 2
+            if boutton2(322,100,682,226)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               armure_type = 1
+               Game_armure_force = 6 : rem on est capable de proter 6kg
+               Coeff_Vitesse_Joueur# = 2
+               Multi_prepa_pano_Cjoueur = 3
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArme.jpg",5
+               load image "ChoixArme2.tga",6
+               load image "ChoixArme3.tga",7
+               dim game_arme_embaquee(100)
+               Solde = Player_stats(0)
+               set dir CheminMA$+"\Models\Armes\"
+               open to read 1,"index.ini"
+               Armes_count_cat10 = 0
+               Armes_count_cat20 = 0
+               Armes_count_cat30 = 0
+               Armes_count_cat40 = 0
+               Armes_count_cat50 = 0
+               Armes_count_cat60 = 0
+               Armes_count_cat70 = 0
+               Armes_count_cat80 = 0
+               Armes_count_cat90 = 0
+               Armes_achtee_count = 0
+               repeat
+               read string 1,temp$
+               if temp$ = "[arme]"
+               read string 1,temp$
+               read string 1,temp2$
+               if int(val(temp2$)) >= 10 and int(val(temp2$)) < 20 then inc Armes_count_cat10
+               if int(val(temp2$)) >= 20 and int(val(temp2$)) < 30 then inc Armes_count_cat20
+               if int(val(temp2$)) >= 30 and int(val(temp2$)) < 40 then inc Armes_count_cat30
+               if int(val(temp2$)) >= 40 and int(val(temp2$)) < 50 then inc Armes_count_cat40
+               if int(val(temp2$)) >= 50 and int(val(temp2$)) < 60 then inc Armes_count_cat50
+               if int(val(temp2$)) >= 60 and int(val(temp2$)) < 70 then inc Armes_count_cat60
+               if int(val(temp2$)) >= 70 and int(val(temp2$)) < 80 then inc Armes_count_cat70
+               if int(val(temp2$)) >= 80 and int(val(temp2$)) < 90 then inc Armes_count_cat80
+               if int(val(temp2$)) >= 90 and int(val(temp2$)) < 100 then inc Armes_count_cat90
+               listarme(int(val(temp2$))).name$ = temp$
+               read string 1,temp$
+               listarme(int(val(temp2$))).price = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).poid = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+               endif
+               until file end(1) = 1
+               close file 1
+            endif
+            if boutton2(322,226,682,369)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               armure_type = 2
+               Game_armure_force = 10 : rem on est capable de proter 10kg
+               Coeff_Vitesse_Joueur# = 1.5
+               Multi_prepa_pano_Cjoueur = 3
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArme.jpg",5
+               load image "ChoixArme2.tga",6
+               load image "ChoixArme3.tga",7
+               dim game_arme_embaquee(100)
+               Solde = Player_stats(0)
+               set dir CheminMA$+"\Models\Armes\"
+               open to read 1,"index.ini"
+               Armes_count_cat10 = 0
+               Armes_count_cat20 = 0
+               Armes_count_cat30 = 0
+               Armes_count_cat40 = 0
+               Armes_count_cat50 = 0
+               Armes_count_cat60 = 0
+               Armes_count_cat70 = 0
+               Armes_count_cat80 = 0
+               Armes_count_cat90 = 0
+               Armes_achtee_count = 0
+               repeat
+               read string 1,temp$
+               if temp$ = "[arme]"
+               read string 1,temp$
+               read string 1,temp2$
+               if int(val(temp2$)) >= 10 and int(val(temp2$)) < 20 then inc Armes_count_cat10
+               if int(val(temp2$)) >= 20 and int(val(temp2$)) < 30 then inc Armes_count_cat20
+               if int(val(temp2$)) >= 30 and int(val(temp2$)) < 40 then inc Armes_count_cat30
+               if int(val(temp2$)) >= 40 and int(val(temp2$)) < 50 then inc Armes_count_cat40
+               if int(val(temp2$)) >= 50 and int(val(temp2$)) < 60 then inc Armes_count_cat50
+               if int(val(temp2$)) >= 60 and int(val(temp2$)) < 70 then inc Armes_count_cat60
+               if int(val(temp2$)) >= 70 and int(val(temp2$)) < 80 then inc Armes_count_cat70
+               if int(val(temp2$)) >= 80 and int(val(temp2$)) < 90 then inc Armes_count_cat80
+               if int(val(temp2$)) >= 90 and int(val(temp2$)) < 100 then inc Armes_count_cat90
+               listarme(int(val(temp2$))).name$ = temp$
+               read string 1,temp$
+               listarme(int(val(temp2$))).price = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).poid = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+               endif
+               until file end(1) = 1
+               close file 1
+            endif
+            if boutton2(322,369,682,500)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               armure_type = 3
+               Game_armure_force = 15 : rem on est capable de proter 15kg
+               Coeff_Vitesse_Joueur# = 1
+               Multi_prepa_pano_Cjoueur = 3
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArme.jpg",5
+               load image "ChoixArme2.tga",6
+               load image "ChoixArme3.tga",7
+               dim game_arme_embaquee(100)
+               Solde = Player_stats(0)
+               set dir CheminMA$+"\Models\Armes\"
+               open to read 1,"index.ini"
+               Armes_count_cat10 = 0
+               Armes_count_cat20 = 0
+               Armes_count_cat30 = 0
+               Armes_count_cat40 = 0
+               Armes_count_cat50 = 0
+               Armes_count_cat60 = 0
+               Armes_count_cat70 = 0
+               Armes_count_cat80 = 0
+               Armes_count_cat90 = 0
+               Armes_achtee_count = 0
+               repeat
+               read string 1,temp$
+               if temp$ = "[arme]"
+               read string 1,temp$
+               read string 1,temp2$
+               if int(val(temp2$)) >= 10 and int(val(temp2$)) < 20 then inc Armes_count_cat10
+               if int(val(temp2$)) >= 20 and int(val(temp2$)) < 30 then inc Armes_count_cat20
+               if int(val(temp2$)) >= 30 and int(val(temp2$)) < 40 then inc Armes_count_cat30
+               if int(val(temp2$)) >= 40 and int(val(temp2$)) < 50 then inc Armes_count_cat40
+               if int(val(temp2$)) >= 50 and int(val(temp2$)) < 60 then inc Armes_count_cat50
+               if int(val(temp2$)) >= 60 and int(val(temp2$)) < 70 then inc Armes_count_cat60
+               if int(val(temp2$)) >= 70 and int(val(temp2$)) < 80 then inc Armes_count_cat70
+               if int(val(temp2$)) >= 80 and int(val(temp2$)) < 90 then inc Armes_count_cat80
+               if int(val(temp2$)) >= 90 and int(val(temp2$)) < 100 then inc Armes_count_cat90
+               listarme(int(val(temp2$))).name$ = temp$
+               read string 1,temp$
+               listarme(int(val(temp2$))).price = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).poid = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+               endif
+               until file end(1) = 1
+               close file 1
+            endif
+            if boutton2(322,500,682,638)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               armure_type = 4
+               Game_armure_force = 20 : rem on est capable de proter 20kg
+               Coeff_Vitesse_Joueur# = 0.75
+               Multi_prepa_pano_Cjoueur = 3
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArme.jpg",5
+               load image "ChoixArme2.tga",6
+               load image "ChoixArme3.tga",7
+               dim game_arme_embaquee(100)
+               Solde = Player_stats(0)
+               set dir CheminMA$+"\Models\Armes\"
+               open to read 1,"index.ini"
+               Armes_count_cat10 = 0
+               Armes_count_cat20 = 0
+               Armes_count_cat30 = 0
+               Armes_count_cat40 = 0
+               Armes_count_cat50 = 0
+               Armes_count_cat60 = 0
+               Armes_count_cat70 = 0
+               Armes_count_cat80 = 0
+               Armes_count_cat90 = 0
+               Armes_achtee_count = 0
+               repeat
+               read string 1,temp$
+               if temp$ = "[arme]"
+               read string 1,temp$
+               read string 1,temp2$
+               if int(val(temp2$)) >= 10 and int(val(temp2$)) < 20 then inc Armes_count_cat10
+               if int(val(temp2$)) >= 20 and int(val(temp2$)) < 30 then inc Armes_count_cat20
+               if int(val(temp2$)) >= 30 and int(val(temp2$)) < 40 then inc Armes_count_cat30
+               if int(val(temp2$)) >= 40 and int(val(temp2$)) < 50 then inc Armes_count_cat40
+               if int(val(temp2$)) >= 50 and int(val(temp2$)) < 60 then inc Armes_count_cat50
+               if int(val(temp2$)) >= 60 and int(val(temp2$)) < 70 then inc Armes_count_cat60
+               if int(val(temp2$)) >= 70 and int(val(temp2$)) < 80 then inc Armes_count_cat70
+               if int(val(temp2$)) >= 80 and int(val(temp2$)) < 90 then inc Armes_count_cat80
+               if int(val(temp2$)) >= 90 and int(val(temp2$)) < 100 then inc Armes_count_cat90
+               listarme(int(val(temp2$))).name$ = temp$
+               read string 1,temp$
+               listarme(int(val(temp2$))).price = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).poid = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+               endif
+               until file end(1) = 1
+               close file 1
+            endif
+            if boutton2(322,638,682,768)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+               armure_type = 5
+               Game_armure_force = 75 : rem on est capable de proter 75kg
+               Coeff_Vitesse_Joueur# = 0.5
+               Multi_prepa_pano_Cjoueur = 3
+               delete image 5
+               set dir CheminMA$+"\jpegs\menu"
+               load image "ChoixArme.jpg",5
+               load image "ChoixArme2.tga",6
+               load image "ChoixArme3.tga",7
+               dim game_arme_embaquee(100)
+               Solde = Player_stats(0)
+               set dir CheminMA$+"\Models\Armes\"
+               open to read 1,"index.ini"
+               Armes_count_cat10 = 0
+               Armes_count_cat20 = 0
+               Armes_count_cat30 = 0
+               Armes_count_cat40 = 0
+               Armes_count_cat50 = 0
+               Armes_count_cat60 = 0
+               Armes_count_cat70 = 0
+               Armes_count_cat80 = 0
+               Armes_count_cat90 = 0
+               Armes_achtee_count= 0
+               repeat
+               read string 1,temp$
+               if temp$ = "[arme]"
+               read string 1,temp$
+               read string 1,temp2$
+               if int(val(temp2$)) >= 10 and int(val(temp2$)) < 20 then inc Armes_count_cat10
+               if int(val(temp2$)) >= 20 and int(val(temp2$)) < 30 then inc Armes_count_cat20
+               if int(val(temp2$)) >= 30 and int(val(temp2$)) < 40 then inc Armes_count_cat30
+               if int(val(temp2$)) >= 40 and int(val(temp2$)) < 50 then inc Armes_count_cat40
+               if int(val(temp2$)) >= 50 and int(val(temp2$)) < 60 then inc Armes_count_cat50
+               if int(val(temp2$)) >= 60 and int(val(temp2$)) < 70 then inc Armes_count_cat60
+               if int(val(temp2$)) >= 70 and int(val(temp2$)) < 80 then inc Armes_count_cat70
+               if int(val(temp2$)) >= 80 and int(val(temp2$)) < 90 then inc Armes_count_cat80
+               if int(val(temp2$)) >= 90 and int(val(temp2$)) < 100 then inc Armes_count_cat90
+               listarme(int(val(temp2$))).name$ = temp$
+               read string 1,temp$
+               listarme(int(val(temp2$))).price = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).poid = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).Chargeur_start = val(temp$)
+               read string 1,temp$
+               listarme(int(val(temp2$))).BuletsparChargeur = val(temp$)
+               endif
+               until file end(1) = 1
+               close file 1
+            endif
+         endcase
+         case 3
+            if Multi_prepa_pano_Cjoueur_arme_cat = 0 : rem La catégorie d'arme (0, rien, 1, flingues, 2, auto,....)
+               for t= 0 to 8
+                  if boutton2(282,100+t*30,758,130+t*30)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+            endif
+
+            if Multi_prepa_pano_Cjoueur_arme_cat = 1
+               if boutton2(282,100,758,130): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat10-1
+                  if boutton2(282,130+30*t,758,160+30*t) and game_arme_embaquee(10+t) = 0 and Game_armure_force-poid_achat-listarme(10+t).poid>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(10+t).price
+                     inc poid_achat,listarme(10+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(10+t) = 1
+                     arme = 1000+10+t
+                  else
+                     if boutton2(282,130+30*t,758,160+30*t) and game_arme_embaquee(10+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(10+t).price
+                        dec poid_achat,listarme(10+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(10+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(10+t).poid)<0 and boutton2(282,130+30*t,758,160+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,130+30*t,758,160+30*t) then Multi_prepa_pano_arme_prix = listarme(10+t).price : Multi_prepa_pano_arme_poid = listarme(10+t).poid
+               next t
+               for t = 1 to 8
+                  if boutton2(282,130+30*Armes_count_cat10,758,160+30*(Armes_count_cat10-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 2
+               if boutton2(282,130,758,160): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat20-1
+                  if boutton2(282,160+30*t,758,190+30*t) and game_arme_embaquee(20+t) = 0 and Game_armure_force-poid_achat-listarme(20+t).poid>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(20+t).price
+                     inc poid_achat,listarme(20+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(20+t) = 1
+                     arme = 1020+t
+                  else
+                     if boutton2(282,160+30*t,758,190+30*t) and game_arme_embaquee(20+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(20+t).price
+                        dec poid_achat,listarme(20+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(20+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(20+t).poid)<0 and boutton2(282,160+30*t,758,190+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,160+30*t,758,190+30*t) then Multi_prepa_pano_arme_prix = listarme(20+t).price : Multi_prepa_pano_arme_poid = listarme(20+t).poid
+               next t
+               for t = 2 to 8
+                  if boutton2(282,160+30*Armes_count_cat20,758,190+30*(Armes_count_cat20-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 3
+               if boutton2(282,160,758,190): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat30-1
+                  if boutton2(282,190+30*t,758,220+30*t) and game_arme_embaquee(30+t) = 0 and Game_armure_force-poid_achat-listarme(30+t).poid>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(30+t).price
+                     inc poid_achat,listarme(30+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(30+t) = 1
+                     arme = 1030+t
+                  else
+                     if boutton2(282,190+30*t,758,220+30*t) and game_arme_embaquee(30+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(30+t).price
+                        dec poid_achat,listarme(30+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(30+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(30+t).poid)<0 and boutton2(282,190+30*t,758,220+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,190+30*t,758,220+30*t) then Multi_prepa_pano_arme_prix = listarme(30+t).price : Multi_prepa_pano_arme_poid = listarme(30+t).poid
+               next t
+               for t = 3 to 8
+                  if boutton2(282,190+30*Armes_count_cat30,758,190+30*(Armes_count_cat30-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 4
+               if boutton2(282,190,758,220): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat40-1
+                  if boutton2(282,220+30*t,758,250+30*t) and game_arme_embaquee(40+t) = 0 and Game_armure_force-(poid_achat+listarme(40+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(40+t).price
+                     inc poid_achat,listarme(40+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(40+t) = 1
+                     arme = 1040+t
+                  else
+                     if boutton2(282,220+30*t,758,250+30*t) and game_arme_embaquee(40+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(40+t).price
+                        dec poid_achat,listarme(40+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(40+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(40+t).poid)<0 and boutton2(282,220+30*t,758,250+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,220+30*t,758,250+30*t) then Multi_prepa_pano_arme_prix = listarme(40+t).price : Multi_prepa_pano_arme_poid = listarme(40+t).poid
+               next t
+               for t = 4 to 8
+                  if boutton2(282,220+30*Armes_count_cat40,758,220+30*(Armes_count_cat40-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 5
+               if boutton2(282,220,758,250): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat50-1
+                  if boutton2(282,250+30*t,758,280+30*t) and game_arme_embaquee(50+t) = 0 and Game_armure_force-(poid_achat+listarme(50+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(50+t).price
+                     inc poid_achat,listarme(50+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(50+t) = 1
+                     arme = 1050+t
+                  else
+                     if boutton2(282,250+30*t,758,280+30*t) and game_arme_embaquee(50+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(50+t).price
+                        dec poid_achat,listarme(50+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(50+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(50+t).poid)<0 and boutton2(282,250+30*t,758,280+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,250+30*t,758,280+30*t) then Multi_prepa_pano_arme_prix = listarme(50+t).price : Multi_prepa_pano_arme_poid = listarme(50+t).poid
+               next t
+               for t = 5 to 8
+                  if boutton2(282,250+30*Armes_count_cat50,758,280+30*(Armes_count_cat50-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+               if boutton2(282,190,758,220)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 4
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 6
+               if boutton2(282,250,758,280): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat60-1
+                  if boutton2(282,280+30*t,758,310+30*t) and game_arme_embaquee(60+t) = 0 and Game_armure_force-(poid_achat+listarme(60+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(60+t).price
+                     inc poid_achat,listarme(60+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(60+t) = 1
+                     arme = 1060+t
+                  else
+                     if boutton2(282,280+30*t,758,310+30*t) and game_arme_embaquee(60+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(60+t).price
+                        dec poid_achat,listarme(60+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(60+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(60+t).poid)<0 and boutton2(282,280+30*t,758,310+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,280+30*t,758,310+30*t) then Multi_prepa_pano_arme_prix = listarme(60+t).price : Multi_prepa_pano_arme_poid = listarme(60+t).poid
+               next t
+               for t = 6 to 8
+                  if boutton2(282,280+30*Armes_count_cat60,758,280+30*(Armes_count_cat60-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+               if boutton2(282,190,758,220)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 4
+               endif
+               if boutton2(282,220,758,250)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 5
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 7
+               if boutton2(282,280,758,310): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat70-1
+                  if boutton2(282,310+30*t,758,340+30*t) and game_arme_embaquee(70+t) = 0 and Game_armure_force-(poid_achat+listarme(70+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(70+t).price
+                     inc poid_achat,listarme(70+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(70+t) = 1
+                     arme = 1070+t
+                  else
+                     if boutton2(282,310+30*t,758,340+30*t) and game_arme_embaquee(70+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(70+t).price
+                        dec poid_achat,listarme(70+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(70+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(70+t).poid)<0 and boutton2(282,310+30*t,758,340+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,310+30*t,758,350+30*t) then Multi_prepa_pano_arme_prix = listarme(70+t).price : Multi_prepa_pano_arme_poid = listarme(70+t).poid
+               next t
+               for t = 7 to 8
+                  if boutton2(282,310+30*Armes_count_cat70,758,280+30*(Armes_count_cat70-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+               if boutton2(282,190,758,220)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 4
+               endif
+               if boutton2(282,220,758,250)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 5
+               endif
+               if boutton2(282,250,758,280)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 6
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 8
+               if boutton2(282,310,758,340): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat80-1
+                  if boutton2(282,340+30*t,758,370+30*t) and game_arme_embaquee(80+t) = 0 and Game_armure_force-(poid_achat+listarme(80+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(80+t).price
+                     inc poid_achat,listarme(80+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(80+t) = 1
+                     arme = 1080+t
+                  else
+                     if boutton2(282,340+30*t,758,370+30*t) and game_arme_embaquee(80+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(80+t).price
+                        dec poid_achat,listarme(80+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(80+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(80+t).poid)<0 and boutton2(282,340+30*t,758,370+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,340+30*t,758,370+30*t) then Multi_prepa_pano_arme_prix = listarme(80+t).price : Multi_prepa_pano_arme_poid = listarme(80+t).poid
+               next t
+               for t = 8 to 8
+                  if boutton2(282,340+30*Armes_count_cat80,758,310+30*(Armes_count_cat80-1)+30*t)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     Multi_prepa_pano_Cjoueur_arme_cat = t+1
+                  endif
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+               if boutton2(282,190,758,220)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 4
+               endif
+               if boutton2(282,220,758,250)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 5
+               endif
+               if boutton2(282,250,758,280)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 6
+               endif
+               if boutton2(282,280,758,310)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 7
+               endif
+            endif
+            if Multi_prepa_pano_Cjoueur_arme_cat = 9
+               if boutton2(282,340,758,370): rem on revien a cat 0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 0
+               endif
+               for t = 0 to Armes_count_cat90-1
+                  if boutton2(282,370+30*t,758,100+30*t) and game_arme_embaquee(90+t) = 0 and Game_armure_force-(poid_achat+listarme(90+t).poid)>=0
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     dec solde,listarme(90+t).price
+                     inc poid_achat,listarme(90+t).poid
+                     inc Armes_achtee_count
+                     game_arme_embaquee(90+t) = 1
+                     arme = 1090+t
+                  else
+                     if boutton2(282,370+30*t,758,400+30*t) and game_arme_embaquee(90+t) = 1
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop : rem on revend l'arme
+                        inc solde,listarme(90+t).price
+                        dec poid_achat,listarme(90+t).poid
+                        dec Armes_achtee_count
+                        game_arme_embaquee(90+t) = 0
+                        arme = 1010
+                     endif
+                     if Game_armure_force-(poid_achat+listarme(90+t).poid)<0 and boutton2(282,370+30*t,758,400+30*t)
+                        do
+                        paste image 4,0,0
+                        if mouseclick() = 0 then exit
+                        loop
+                     endif
+                  endif
+                  if survol(282,370+30*t,758,400+30*t) then Multi_prepa_pano_arme_prix = listarme(80+t).price : Multi_prepa_pano_arme_poid = listarme(80+t).poid
+               next t
+               if boutton2(282,100,758,130)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 1
+               endif
+               if boutton2(282,130,758,160)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 2
+               endif
+               if boutton2(282,160,758,190)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 3
+               endif
+               if boutton2(282,190,758,220)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 4
+               endif
+               if boutton2(282,220,758,250)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 5
+               endif
+               if boutton2(282,250,758,280)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 6
+               endif
+               if boutton2(282,280,758,310)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 7
+               endif
+               if boutton2(282,310,758,340)
+                  do
+                  paste image 4,0,0
+                  if mouseclick() = 0 then exit
+                  loop
+                  Multi_prepa_pano_Cjoueur_arme_cat = 8
+               endif
+            endif
+            if boutton2(616,733,756,768)
+                     do
+                     paste image 4,0,0
+                     if mouseclick() = 0 then exit
+                     loop
+                     if game_arme_embaquee(10) = 0 and Armes_achtee_count=0
+                     game_arme_embaquee(10) = 1 : rem Glock forever
+                     inc Armes_achtee_count
+                     endif
+                        Rem Passage a la config des armes
+                        set dir CheminMA$+"\jpegs\menu"
+                        if image exist(5) = 1 then delete image 5
+                        Load image "ChoixInstru.jpg",5
+                        if image exist(5) = 1 then delete image 6
+                        Load image "ChoixArme.jpg",6: rem on fait du recyclage
+                        if image exist(5) = 1 then delete image 7
+                        Load image "ChoixArme2.tga",7: rem on fait du recyclage
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat10 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat20 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat30 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat40 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat50 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat60 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat70 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat80 = 0
+                        Multi_prepa_pano_Cjoueur_arme_conf_cat90 = 0
+                        Armes_count = Armes_count_cat10 + Armes_count_cat20 + Armes_count_cat30 + Armes_count_cat40 + Armes_count_cat50 + Armes_count_cat60 + Armes_count_cat70 + Armes_count_cat80 + Armes_count_cat90
+                        if Armes_conf_panneau_ini = 0 : rem pour éviter de redéclarer un tableau plusieurs fois
+                           dim Armes_conf_panneau(Armes_achtee_count,3)
+                           dim Armes_conf_panneau_nbaccesoir(100)
+                           dim Armes_conf_panneau_STR(8) as string : rem 8, c'est le nb d'accesoires en tout
+                           dim Armes_conf_panneau_prix(8): rem 8, c'est le nb d'accesoires en tout
+                           Armes_conf_panneau_nbaccesoir(10) = 1
+                           Armes_conf_panneau_nbaccesoir(30) = 0
+                           Armes_conf_panneau_nbaccesoir(40) = 4
+                           Armes_conf_panneau_nbaccesoir(41) = 2
+                           Armes_conf_panneau_nbaccesoir(50) = 0
+                           Armes_conf_panneau_nbaccesoir(51) = 0
+                           Armes_conf_panneau_nbaccesoir(60) = 0
+                           Armes_conf_panneau_nbaccesoir(70) = 1
+                           Armes_conf_panneau_STR(0) = "Silencieux"
+                           Armes_conf_panneau_STR(1) = "Silencieux"
+                           Armes_conf_panneau_STR(2) = "ACOG"
+                           Armes_conf_panneau_STR(3) = "Laser"
+                           Armes_conf_panneau_STR(4) = "Chargeurs tambours"
+                           Armes_conf_panneau_STR(5) = "Silencieux"
+                           Armes_conf_panneau_STR(6) = "Laser"
+                           Armes_conf_panneau_STR(7) = "Silencieux"
+                           Armes_conf_panneau_prix(0) = 100
+                           Armes_conf_panneau_prix(1) = 300
+                           Armes_conf_panneau_prix(2) = 350
+                           Armes_conf_panneau_prix(3) = 500
+                           Armes_conf_panneau_prix(4) = 1500
+                           Armes_conf_panneau_prix(5) = 300
+                           Armes_conf_panneau_prix(6) = 300
+                           Armes_conf_panneau_prix(7) = 1800
+                           i =0
+                           for t = 10 to 80
+                              if game_arme_embaquee(t) = 1 then Armes_conf_panneau(i,2) = t :inc i
+                           next t
+                           Armes_conf_panneau_ini = 1
+                        endif
+                        Multi_prepa_pano_Cjoueur = 4
+
+            endif
+         endcase
+         case 4
+            rem ouverture/fermeture d'une arme
+            for t = 0 to Armes_achtee_count-1
+               if boutton2(282,Armes_conf_panneau(t,1),758,Armes_conf_panneau(t,1)+30)
+                  do
+                     paste image 4,0,0
+                     paste image 5,282,100
+                     if mouseclick() = 0 then exit
+                  loop
+                  Armes_conf_panneau(t,0) = _Xor(Armes_conf_panneau(t,0),1)
+               endif
+
+            next t
+            rem achat d'un accesoire
+            i=0
+            for t = 10 to 80 : rem nombre d'index des armes (=100)
+               if game_arme_embaquee(t)=1
+                 if boutton2(282,Armes_conf_panneau(i,1),758,Armes_conf_panneau(i,1)+30)
+                     dec solde,Armes_conf_panneau_prix(i)
+                     select
+                 endif
+                 inc i
+               endif
+            next t
+         endcase
+      endselect
+
+   endcase
+endselect
+
+
+
+rem le Chat
+if boutton2(0,100,207,138) then chat = 1 : clear entry buffer
+If ( chat = 1 )
+      If ( Returnkey( ) = 0 )
+         Multi_msg_temp$ = Entry$( 1 )
+      endif
+      set cursor 5,115
+      print ">:"+Multi_msg_temp$
+      If ( Returnkey( ) = 1 or boutton2(207,100,280,138)) Then chat = 2
+Endif
+if chat = 2
+   for i = 0 to 38
+   game_console$(39-i) = game_console$(38-i)
+   next i
+   game_console$(0) = "<"+joueurs(multi_your_no).name$+">" + Multi_msg_temp$
+   Net Put Byte MSG
+   Net Put String Multi_msg_temp$
+   If ( Menu_SRV = 1 )
+      Net Send all
+   else
+      Net Send 1
+   endif
+Multi_msg_temp$ = ""
+chat = 0
+endif
+for t=0 to 39
+   set cursor 5,150+t*14
+   print game_console$(t)
+next t
+loop
+
+
+
+
+
+rem ==========================================================================================================================
+rem ============================================= NETPASSS ==================================================================
+rem ===========================================================================================================================
+
+
+Multi_prepa_partie_netpass:
+rem ================================================ SRV ====================================================
+if Menu_SRV = 1
+rem si on a modifié les infos de la partie (map, fraglimit,.....)
+if Multi_info_partie_asend = 1
+Net Put Byte PrePartie_info
+Net Put Byte Fraglimit
+Net Put String game_carte$
+Net Put Byte nbwarmachines
+Net Put Byte nbsentinelles
+Net Put Byte nballies
+endif
+
+`Si un nouveau joueur se connecte
+   temp = Net Player Joined( )
+   If temp
+      inc Multi_nb_player
+      array insert at bottom joueurs(0)
+      rem on attend son message d'arrivée
+      Multi_wait_for_Nplayer_data = 1
+   endif
+   temp = 0
+
+rem un player se déco ?
+temp = Net Player Left( )
+if temp > 0
+array delete element joueurs(0),result
+dec Multi_nb_player
+Net Put Byte Player_Left
+Net Put Byte temp
+net send all
+endif
+temp = 0
+
+`Traitement des messages du réseau
+While Net Get Message( )
+multi_prepa_mesage_expeditor = Net Message From( )
+
+ `/ Selection des messages
+ Select Net Get Byte( )
+
+      case New_player_data
+         rem si on attendais un message d'arrivée d'un joueur :
+         if Multi_wait_for_Nplayer_data = 1
+         Multi_wait_for_Nplayer_data = 0
+         joueurs(multi_prepa_mesage_expeditor).name$ = net get string ()
+         rem on préviens les autres
+         Net Put Byte New_player_data
+         Net Put Byte multi_prepa_mesage_expeditor
+         Net Put String Configjoueur$
+          SendAllExcept(multi_prepa_mesage_expeditor)
+          rem et on lui donne la comfig
+          Net Put Byte Player_accepted_in_game
+          Net Put Byte 0 : rem on dit au client que la partie n'a pas encore commencée (Multi_partie_lancee = 0)
+          Net Put Byte multi_prepa_mesage_expeditor
+          Net Put Byte Multi_nb_player
+          for i = 0 to multi_prepa_mesage_expeditor
+            net put string " "+joueurs(i).name$
+          next i
+         Net Put Byte Fraglimit
+         Net Put String game_carte$
+         Net Put Byte nbwarmachines
+         Net Put Byte nbsentinelles
+         Net Put Byte nballies
+          net send multi_prepa_mesage_expeditor
+         endif
+         endcase
+         case MSG
+         Multi_msg_temp$ = net get string ()
+         for i = 0 to 13
+         game_console$(14-i) = game_console$(13-i)
+         next i
+         game_console$(0) = "<"+joueurs(your_no).name$+"> : " + Multi_msg_temp$
+         Net Put Byte MSG
+         Net Put String Multi_msg_temp$
+         SendAllExcept(multi_prepa_mesage_expeditor)
+         endcase
+
+ endselect
+
+
+
+endwhile
+else
+rem ================================================ Client ====================================================
+
+`Traitement des messages du réseau
+While Net Get Message( )
+multi_prepa_mesage_expeditor = Net Message From( )
+`/ Selection des messages
+Select Net Get Byte( )
+
+      case New_player_data
+         rem si on nous dit qu'il y a dorénavant un petit nouveau dans la partie
+         array insert at bottom joueurs(0)
+         joueurs(net get byte()).name$ = net get string ()
+      endcase
+      case Player_Left
+      rem si on a un déserteur
+      array delete element joueurs(0),Net Get Byte()
+      endcase
+      case MSG
+      Multi_msg_temp$ = net get string ()
+         for i = 0 to 13
+         game_console$(14-i) = game_console$(13-i)
+         next i
+         game_console$(0) = "<"+joueurs(playerNum).name$+"> : "+Multi_msg_temp$
+      endcase
+
+      case PrePartie_info
+         Fraglimit = Net get Byte()
+         game_carte$ = Net get String()
+         nbwarmachines = Net get Byte()
+         nbsentinelles = Net get Byte()
+         nballies = Net get Byte()
+      endcase
+
+endselect
+
+endwhile
+endif
+
+return
+

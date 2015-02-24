@@ -1,0 +1,77 @@
+Rem *** Include File: Script.dba ***
+Rem Created: 13/04/2008 12:23:24
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Solo_Script_lecture:
+set dir CheminMA$+"\cartes\"+type_game$+"\"+game_carte$+"\"
+if file exist(game_carte$ + ".ini") = 1
+open to read 1,game_carte$ + ".ini"
+
+
+read string 1,Script_nblignes$
+Script_nblignes = val(Script_nblignes$)
+
+for i = 0 to Script_nblignes
+read string 1,temp$
+Script_datas$(i) = temp$
+next i
+
+for i = 1 to Script_nblignes+1
+Script_temp1$ = Script_datas$(i-1)
+Script_temp2$ = Script_datas$(i)
+Script_temp3$ = Script_datas$(i+1)
+Script_temp4$ = Script_datas$(i+2)
+
+
+
+  select Script_temp1$
+   case "[ghost]"
+   if val(Script_temp2$) = 1 then ghost object on 1
+   endcase
+   case "[backdrop color]"
+   color backdrop rgb(val(Script_temp2$),val(Script_temp3$),val(Script_temp4$))
+   endcase
+   case "[sky diameter]"
+   scale object 5,val(Script_temp2$)*-1,val(Script_temp3$)*-1,val(Script_temp4$)*-1
+   SKY_SCALED  = 1
+   endcase
+   case "[sky orientation]"
+   rotate object 5,val(Script_temp2$),val(Script_temp3$),val(Script_temp4$)
+   endcase
+   case "[sky rotation]"
+   rotate_sky_x = val(Script_temp2$)
+   rotate_sky_y = val(Script_temp3$)
+   rotate_sky_z = val(Script_temp4$)
+   endcase
+   case "[sky rotation speed]"
+   sky_speed = val(Script_temp2$)
+   endcase
+   case "[y frag level]"
+   Yfrag_level = val(Script_temp2$)*-1
+   endcase
+   case "[Goliath]"
+   Goliaths(nb_goliath).x = val(Script_temp2$)
+   Goliaths(nb_goliath).y = val(Script_temp3$)
+   Goliaths(nb_goliath).z = val(Script_temp4$)
+   inc nb_goliath
+   endcase
+   endselect
+
+next i
+close file 1
+script_found  =1
+else
+script_found  =0
+scale object 5,-18000,-18000,-18000
+sc_setupobject 5,5,0
+Yfrag_level = -999999
+endif
+if SKY_SCALED  = 0 then scale object 5,-20000,-20000,-20000
+
+rem a enlever losque tout sa serat au point
+script_found  =1
+
+return
+
+
+

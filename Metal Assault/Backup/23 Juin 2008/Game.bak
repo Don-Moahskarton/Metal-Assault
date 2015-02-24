@@ -1,0 +1,218 @@
+Rem *** Include File: Game.dba ***
+Rem Created: 30/08/2007 22:14:12
+
+Rem Included in Project: C:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+game:
+
+rem =__================================================================================================================================
+rem |__)  __         __  |    ___       __   __  o  __   __  o  __   __  |    ___   =====================================================
+rem |__) (__) (__(_ (___ |_, (__/_     |__) |  ' | |  ) (___ | |__) (__( |_, (__/_  =============================================================
+rem                                    |                       |                     =======================================================
+rem ===================================================================================================================================
+
+do
+
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+inc temporel,Extrapolation*3
+
+position mouse 0,0
+set cursor 0,0
+FPS = screen fps() : print "FPS : ",FPS
+print "Polygones :", statistic(1)
+
+
+
+if gameplay_Type = 1
+gosub Game_first_person
+endif
+
+if gameplay_Type = 2
+gosub Game_Goliath
+endif
+
+gosub Game_aux
+
+loop
+
+rem ===========================================================================================================================
+rem *_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+rem ==========================================================================================================================
+
+game_aux:
+
+
+if gameplay_Type = 1
+rem saut
+if mouseclick() = 4 or KEYSTATE(57) = 1 and on_saute = 0
+on_saute = 1
+tenpsaut = 0
+endif
+if on_saute = 1
+inc y#,valsaut#
+valsaut# = 20*sin(tenpsaut)
+inc tenpsaut,Extrapolation/1.5
+endif
+if tenpsaut > 90 then tenpsaut = 0 : on_saute  = 0
+
+rem on est mort si on touche le ciel
+gosub skyfrag
+
+rem le reaprovisionnement en munnition
+gosub Reaprovisionement_Muns
+
+rem on peut rentrer ans un goliath
+gosub rentree_goliath
+
+rem on affiche l'ATH
+gosub Game_UI
+
+endif
+
+rem le texte pricipal (update)
+for t = 0 to 254
+if txt_exist(t) = 1 then Update_txt(t,Extrapolation/6)
+next t
+
+rem les aux en tout genre
+gosub dam_warn
+
+rem l'administration de la partie
+if type_game$="Match_mort"
+gosub admin
+endif
+if type_game$="Domination"
+gosub domadmin
+endif
+
+rem armes et tout le tralala
+gosub armes
+
+rem les enemeis et les alliés
+if type_game$="Match_mort"
+gosub IAmatchamort
+endif
+
+if type_game$="Domination"
+gosub IAdomination
+endif
+
+rem on tourene eventuellement le ciel
+gosub rotate_sky
+
+rem les effets de flou
+for t= 1 to 99999
+if sprite exist (t) then set sprite priority t,1
+next t
+if vie < 20 then game_flou = 15+vie*2 : else : game_flou = 255
+update_fx(abs(game_flou),0,0,timer()/1000)
+
+rem reour au menu principal
+if escapekey() = 1
+wait key
+if escapekey() = 1
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+close file 1
+delete animation 1
+for t = 1 to 60000
+if object exist(t) = 1 then delete object t
+next t
+for t = 1 to 60000
+if image exist(t) = 1 then delete image t
+next t
+for t = 1 to 60000
+if sprite exist(t) = 1 then delete sprite t
+next t
+for t = 1 to 60000
+if sound exist(t) = 1 then delete sound t
+next t
+flush video memory
+goto debut
+else
+goto game
+endif
+endif
+
+return
+
+
+rem ===========================================================================================================================
+rem *_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+rem ==========================================================================================================================
+
+
+
+Etat_Mort:
+set dir CheminMA$+"\Jpegs\Jeu\EC"
+load animation "EC 0.avi",1
+place animation 1,0,param(36)-128,256,param(36)
+loop animation 1
+temp = 255
+stop object game_arme_coress(arme)
+sprite 16,0,-12000,16
+game_morttime# =50
+set current bitmap 0
+ink rgb(255,0,0),0
+box 0,0,param(35),param(36)
+get image 17,0,0,param(35),param(36)
+ink rgb(255,255,255),0
+Game_tombee# = 0
+
+
+
+do
+if dam_warn > 0 then dec dam_warn
+set sprite alpha 18,dam_warn
+update_fx(10,0,0,timer()/1000)
+NewExtrapolationTimer=timer()
+Extrapolation=(NewExtrapolationTimer-OldExtrapolationTimer)/2
+OldExtrapolationTimer=NewExtrapolationTimer
+dec game_morttime#,Extrapolation*0.02
+position camera X#,Y#-Game_tombee#,Z#
+if Game_tombee# < tailleperso# then inc Game_tombee#,Extrapolation*0.04
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.005*zoom
+camx#=camx#+mousemoveX()*0.005*zoom
+if camy#>70 then camy#=70
+if camy#<-100 then camy# = -100
+yrotate camera camx#
+xrotate camera camy#
+zrotate camera Game_tombee#
+if game_morttime# < 0 then exit
+loop
+
+delete sprite 100000
+zrotate camera 0
+set dir CheminMA$+"\Jpegs\jeu"
+set image colorkey 255,255,255
+if image exist(17) =1 then delete image 17
+load image "Small Score.jpg",17
+set image colorkey 0,0,0
+loop object game_arme_coress(arme)
+Vie = 100
+return
+
+
+
+
+
+remstart
+======================================================================================================================================================================
+
+ ______  __   __      _______ __   _ _____  _____  _______  ______
+ |_____]   \_/        |______ | \  |   |   |_____] |______ |_____/
+ |_____]    |         ______| |  \_| __|__ |       |______ |    \_
+
+ ______  _____ __   _ _______ _____  ______ _______
+ |_____]   |   | \  | |_____|   |   |_____/ |______
+ |_____] __|__ |  \_| |     | __|__ |    \_ |______
+
+
+ ====================================================================================================================================================
+ remend
+

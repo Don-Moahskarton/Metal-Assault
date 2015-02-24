@@ -1,0 +1,317 @@
+Rem *** Include File: Persos.dba ***
+Rem Created: 01/01/2008 15:53:13
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+
+IAmatchamort:
+
+for i = 0 to nbBot-1
+
+if Bot(i).cible > 0
+if Bot(Bot(i).cible).Vie <= 0
+oldcible = Bot(i).cible
+   repeat
+   inc Bot(i).cible
+   if Bot(i).cible = Nbbot then Bot(i).cible = 0
+   if Bot(i).cible = oldcible then Bot(i).cible = (Bot(i).cible+1)*-1
+   until Bot(Bot(i).cible).Vie > 0
+endif
+endif
+
+if Bot(i).cible < 0
+if (Bot(i).cible+1)*-1 > 0 then Bot(i).cible = (Bot(i).cible+1)*-1
+endif
+
+sc_updateobject Bot(i).objet
+if Bot(i).Vie > 0
+position object Bot(i).objet,Bot(i).X#,Bot(i).Y#,Bot(i).Z#
+if Bot(i).cible = nballies
+point object Bot(i).objet,object position x(1002),object position y(1002),object position z(1002)
+else
+point object Bot(i).objet,object position x(allie(Bot(i).cible).objet),object position y(allie(Bot(i).cible).objet),object position z(allie(Bot(i).cible).objet)
+endif
+if distance(Bot(i).objet,3)> 300
+Bot(i).oX# = object position X(Bot(i).objet)
+Bot(i).oY# = object position Y(Bot(i).objet)
+Bot(i).oZ# = object position Z(Bot(i).objet)
+
+rem le décisionel
+if Bot(i).DecisionDuree <= 0
+Bot(i).DecisionDuree = 80+rnd(40)
+IA_Decision_TempVal_DecisionVitesse = 800+rnd(400)
+Bot(i).DecisionVitesse# = IA_Decision_TempVal_DecisionVitesse/800
+if distance(Bot(i).objet,3) < 400
+Bot(i).Decision = 4
+else
+Bot(i).Decision = rnd(4)
+endif
+if distance(Bot(i).objet,3) > 2000
+Bot(i).Decision = 3
+else
+Bot(i).Decision = rnd(6)
+endif
+endif
+
+rem l'executif
+if Bot(i).Decision = 0
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#
+endif
+if Bot(i).Decision = 1
+   move object left Bot(i).objet,Extrapolation*Bot(i).DecisionVitesse#*0.8
+   Bot(i).DecisionDuree = Bot(i).DecisionDuree - int(Extrapolation*Bot(i).DecisionVitesse#*0.8)
+endif
+if Bot(i).Decision = 2
+   move object right Bot(i).objet,Extrapolation*Bot(i).DecisionVitesse#*0.8
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#*0.8
+endif
+if Bot(i).Decision = 3
+   move object Bot(i).objet,Extrapolation*Bot(i).DecisionVitesse#
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#
+endif
+if Bot(i).Decision = 4
+   move object Bot(i).objet,(Extrapolation*Bot(i).DecisionVitesse#)*-1
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#
+endif
+if Bot(i).Decision = 5
+   move object Bot(i).objet,Extrapolation*Bot(i).DecisionVitesse#
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#
+endif
+if Bot(i).Decision = 6
+   move object Bot(i).objet,Extrapolation*Bot(i).DecisionVitesse#
+   dec Bot(i).DecisionDuree,Extrapolation*Bot(i).DecisionVitesse#
+endif
+
+
+
+Bot(i).X# = object position X(Bot(i).objet)
+Bot(i).Y# = object position Y(Bot(i).objet)
+Bot(i).Z# = object position Z(Bot(i).objet)
+Bot(i).Y# = Bot(i).Y# -gravite#
+if Bot(i).tipe = 0
+Bot(i).collide = SC_SphereCast(1,Bot(i).ox#,Bot(i).oy#,Bot(i).oz#,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,40,0)
+endif
+if Bot(i).tipe = 1
+Bot(i).collide = SC_SphereCast(1,Bot(i).ox#,Bot(i).oy#,Bot(i).oz#,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,80,0)
+endif
+if Bot(i).collide
+Bot(i).X# = SC_getcollisionslideX()
+Bot(i).Y# = SC_getcollisionslideY()
+Bot(i).Z# = SC_getcollisionslideZ()
+endif
+position object Bot(i).objet,Bot(i).X#,Bot(i).Y#,Bot(i).Z#
+endif
+if Bot(i).tipe = 1 then position object  Bot(i).tete,Bot(i).x#,Bot(i).y#+180,Bot(i).z# : sc_updateobject Bot(i).tete
+Bot(i).Precision  = 130-3*sqrt(distance(Bot(i).objet,3))+52+distance(Bot(i).objet,3)^(1/3)
+endif
+
+
+if Bot(i).temptir+1000<timer() and Bot(i).Tipe = 1
+Bot(i).tirpossible = 1
+else
+if Bot(i).Tipe = 1 then Bot(i).tirpossible = 0
+endif
+if Bot(i).temptir+3000<timer() and Bot(i).Tipe = 0
+Bot(i).tirpossible = 1
+else
+if Bot(i).Tipe = 0 then Bot(i).tirpossible = 0
+endif
+
+if Bot(i).tirpossible = 1
+Bot(i).X# = object position X(Bot(i).objet)
+Bot(i).Y# = object position Y(Bot(i).objet)
+Bot(i).Z# = object position Z(Bot(i).objet)
+move object Bot(i).objet,20000
+Bot(i).Xtemp# = object position X(Bot(i).objet)
+Bot(i).Ytemp# = object position Y(Bot(i).objet)
+Bot(i).Ztemp# = object position Z(Bot(i).objet)
+move object Bot(i).objet,-20000
+Bot(i).temptir = timer()+rnd(1200)-600
+
+Bot(i).tircollide = SC_rayCast(0,Bot(i).X#,Bot(i).Y#+20,Bot(i).Z#,Bot(i).Xtemp#,Bot(i).Ytemp#,Bot(i).Ztemp#,Bot(i).objet)
+if Bot(i).cible = nballies
+if Bot(i).tircollide = 1002 and Bot(i).tirpossible = 1
+play sound 1103
+temp = rnd(100)
+Bot(i).tircollide = SC_rayCast(0,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,X#,Y#,Z#,Bot(i).objet)
+if temp < Bot(i).Precision and Bot(i).tircollide = 0 : rem le pourcentage du droîde et verification que la balle ne traverse pas un mur
+if Bot(i).tipe = 0 then dec vie,(14+rnd(4))
+if Bot(i).tipe = 1 then dec vie,(32+rnd(4))
+if Vie < 0 then killer_name$ = Bot(i).Name$ : killer_num = i
+coef_ralentissement_2# = 5
+inc dam_warn,200
+if dam_warn > 255 then dam_warn = 255
+Bot(i).tirpossible =0
+endif
+endif
+else
+if Bot(i).tircollide = allie(Bot(i).cible).objet and Bot(i).tirpossible = 1
+play sound 1103
+temp = rnd(100)
+Bot(i).tircollide = SC_rayCast(0,Bot(i).X#,Bot(i).Y#,Bot(i).Z#,allie(Bot(i).cible).X#,allie(Bot(i).cible).Y#,allie(Bot(i).cible).Z#,Bot(i).objet)
+if temp < Bot(i).Precision and Bot(i).tircollide = 0 : rem le pourcentage du droîde et verification que la balle ne traverse pas un mur
+if Bot(i).tipe = 0 then dec allie(Bot(i).cible).vie,(14+rnd(4))
+if Bot(i).tipe = 1 then dec allie(Bot(i).cible).vie,(32+rnd(4))
+Bot(i).tirpossible =0
+endif
+endif
+endif
+endif
+
+next i
+
+rem ========================================================================================================================
+rem ======================================= Les Alliés =====================================================================
+rem *_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_**********_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+rem ¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°
+rem ¨_.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-._.-*°¨°*-
+rem ========================================================================================================================
+rem ========================================================================================================================
+for i = 0 to nballies-1
+
+if allie(i).cible > 0
+if Bot(allie(i).cible).Vie <= 0
+oldcible = allie(i).cible
+   repeat
+   inc allie(i).cible
+   if allie(i).cible = Nbbot then allie(i).cible = 0
+   if allie(i).cible = oldcible then allie(i).cible = (allie(i).cible+1)*-1
+   until Bot(allie(i).cible).Vie > 0
+endif
+endif
+
+if allie(i).cible < 0
+if (allie(i).cible+1)*-1 > 0 then allie(i).cible = (allie(i).cible+1)*-1
+endif
+
+sc_updateobject allie(i).objet
+
+
+if allie(i).Vie > 0
+if allie(t).cible => 0
+position object allie(i).objet,allie(i).X#,allie(i).Y#,allie(i).Z#
+point object allie(i).objet,object position x(bot(allie(i).cible).objet),object position y(bot(allie(i).cible).objet),object position z(bot(allie(i).cible).objet)
+if distance(allie(i).objet,3)> 300
+allie(i).oX# = object position X(allie(i).objet)
+allie(i).oY# = object position Y(allie(i).objet)
+allie(i).oZ# = object position Z(allie(i).objet)
+
+rem le décisionel
+if allie(i).DecisionDuree <= 0
+allie(i).DecisionDuree = 180+rnd(40)
+if distance(allie(i).objet,3) < 400
+allie(i).Decision = 4
+else
+allie(i).Decision = rnd(4)
+endif
+if distance(allie(i).objet,3) > 2000
+allie(i).Decision = 3
+else
+allie(i).Decision = rnd(6)
+endif
+endif
+
+rem l'executif
+if allie(i).Decision = 0
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,516,595
+endif
+if allie(i).Decision = 1
+   move object left allie(i).objet,Extrapolation*0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3065,3089
+endif
+if allie(i).Decision = 2
+   move object right allie(i).objet,Extrapolation*0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3090,3114
+endif
+if allie(i).Decision = 3
+   move object allie(i).objet,Extrapolation*0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3021,3045
+endif
+if allie(i).Decision = 4
+   move object allie(i).objet,(Extrapolation*1.2)*-0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3046,3064
+endif
+if allie(i).Decision = 5
+   move object allie(i).objet,Extrapolation*0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3021,3045
+endif
+if allie(i).Decision = 6
+   move object allie(i).objet,Extrapolation*0.5
+   dec allie(i).DecisionDuree,Extrapolation*1.2
+   loop object allie(i).objet,3021,3045
+endif
+
+
+
+
+allie(i).X# = object position X(allie(i).objet)
+allie(i).Y# = object position Y(allie(i).objet)
+allie(i).Z# = object position Z(allie(i).objet)
+allie(i).Y# = allie(i).Y# -gravite#
+allie(i).collide =SC_objectCollision(allie(i).objet,0)
+if allie(i).collide
+allie(i).X# = SC_getcollisionslideX()
+allie(i).Y# = SC_getcollisionslideY()
+allie(i).Z# = SC_getcollisionslideZ()
+endif
+position object allie(i).objet,allie(i).X#,allie(i).Y#,allie(i).Z#
+endif
+if allie(i).tipe = 1 then position object  allie(i).tete,allie(i).x#,allie(i).y#+180,allie(i).z# : sc_updateobject allie(i).tete
+allie(i).Precision  = 130-3*sqrt(distance(allie(i).objet,3))+52+distance(allie(i).objet,3)^(1/3)
+endif
+
+
+if allie(i).temptir+500<timer() and allie(i).Tipe = 0
+allie(i).tirpossible = 1
+else
+allie(i).tirpossible = 0
+endif
+
+if allie(i).tirpossible = 1
+allie(i).X# = object position X(allie(i).objet)
+allie(i).Y# = object position Y(allie(i).objet)
+allie(i).Z# = object position Z(allie(i).objet)
+move object allie(i).objet,20000
+allie(i).Xtemp# = object position X(allie(i).objet)
+allie(i).Ytemp# = object position Y(allie(i).objet)
+allie(i).Ztemp# = object position Z(allie(i).objet)
+move object allie(i).objet,-20000
+allie(i).temptir = timer()+rnd(600)-300
+allie(i).tircollide = SC_rayCast(0,allie(i).X#,allie(i).Y#+20,allie(i).Z#,allie(i).Xtemp#,allie(i).Ytemp#,allie(i).Ztemp#,allie(i).objet)
+if allie(i).tircollide = bot(allie(i).cible).objet and allie(i).tirpossible = 1
+play sound 1103
+temp = rnd(100)
+allie(i).tircollide = SC_rayCast(0,allie(i).X#,allie(i).Y#,allie(i).Z#,X#,Y#,Z#,allie(i).objet)
+if temp < allie(i).Precision and allie(i).tircollide = 0 : rem le pourcentage du bonhomme et verification que la balle ne traverse pas un mur
+dec Bot(allie(i).cible).Vie,(40+rnd(5))
+if Bot(allie(i).cible).Vie < 0 then  allie_meutrieur = t
+coef_ralentissement_2# = 5
+allie(i).tirpossible =0
+endif
+endif
+endif
+endif
+next i
+
+
+
+
+
+
+
+
+
+
+
+
+
+return
+
+
+
+

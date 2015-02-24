@@ -1,0 +1,114 @@
+Rem *** Include File: Game_tourelle.dba ***
+Rem Created: 24/05/2008 11:11:44
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Game_Goliath:
+oldcamy#=camy#
+oldcamx#=camx#
+camy#=camy#+mousemoveY()*0.005*zoom
+camx#=camx#+mousemoveX()*0.005*zoom
+if camy#>50 then camy#=50
+if camy#<-60 then camy# = -60
+yrotate camera camx#
+yrotate object Goliath_number,camx#
+xrotate camera camy#
+position camera object position X(Goliath_number),object position Y(Goliath_number)+120,object position Z(Goliath_number)
+move camera -50
+
+if keystate(18) = 1
+do
+if keystate(18) =  0 then exit
+loop
+gameplay_Type = 1
+Dans_le_goliath_le_joueur_est = 0
+exclude object off game_arme_coress(arme)
+stop sound 8000
+stop sound 8001
+stop sound 8002
+endif
+
+
+rem le tir
+if mouseclick() = 1 then inc Goliaths(Goliath_number-1281).Vitesse : Goliaths(Goliath_number-1281).Gachette_etat = 2 : else : dec Goliaths(Goliath_number-1281).Vitesse : Goliaths(Goliath_number-1281).Gachette_etat = 1
+if Goliaths(Goliath_number-1281).Vitesse > 7 then Goliaths(Goliath_number-1281).Vitesse = 7
+if Goliaths(Goliath_number-1281).Vitesse < 0 then Goliaths(Goliath_number-1281).Vitesse = 0
+if Goliaths(Goliath_number-1281).Vitesse > 0
+if 6>Goliaths(Goliath_number-1281).Vitesse>0 and Goliaths(Goliath_number-1281).Gachette_etat = 2
+play object Goliath_number,0,30
+if sound playing(8000) = 0 then play sound 8000
+endif
+if Goliaths(Goliath_number-1281).Vitesse > 5 and goliath_tentir-(timer()+rnd(5)+10)<0
+goliath_tentir = timer()
+   if object looping (Goliath_number) = 0 then loop object Goliath_number,30,70
+   if sound looping (8001) = 0 then stop sound 8000 : loop sound 8001
+   if Goliath_bal_en_cour > 8000+Goliath_nb_bal-32 then Goliath_bal_en_cour = 8000 + (Goliath_bal_en_cour-(8000+Goliath_nb_bal-32))
+   inc Goliath_bal_en_cour,7
+   t = 0
+   for t = 0 to 7
+   position object Goliath_bal_en_cour-t+1,newxvalue(camera position X(),camera angle Y()+90,60),camera position Y()-50,newzvalue(camera position z(),camera angle Y()+90,60)
+   rotate object Goliath_bal_en_cour-t+1,camera angle X(),camera angle Y(),camera angle Z()
+   Goliath_bal_life(Goliath_bal_en_cour-t-8000) = 150
+   show object Goliath_bal_en_cour-t+1
+   next t
+   inc Goliath_bal_en_cour,8
+   t= 0
+   for t = 0 to 7
+   position object Goliath_bal_en_cour-t+1,newxvalue(camera position X(),camera angle Y()-90,60),camera position Y()-50,newzvalue(camera position z(),camera angle Y()-90,60)
+   rotate object Goliath_bal_en_cour-t+1,camera angle X(),camera angle Y(),camera angle Z()
+   Goliath_bal_life(Goliath_bal_en_cour-t-8000) = 150
+   next t
+   t=0
+   for t =0 to 15
+   if Goliath_bal_life(Goliath_bal_en_cour-t-8000) > 0
+   move object Goliath_bal_en_cour-t+1,30
+   sc_updateobject Goliath_bal_en_cour-t+1
+   dec Goliath_bal_life(Goliath_bal_en_cour-t-8000)
+   else
+   position object Goliath_bal_en_cour-t+1,0,90000000,0
+   hide object Goliath_bal_en_cour-t+1
+   endif
+   next t
+endif
+if 0<Goliaths(Goliath_number-1281).Vitesse < 6 and Goliaths(Goliath_number-1281).Gachette_etat = 1
+stop sound 8000
+stop sound 8001
+play sound 8002
+play object Goliath_number,70,100
+Goliaths(Goliath_number-1281).Gachette_etat = 0
+endif
+endif
+
+rem on fait avancer les Muns
+if Goliath_bal_en_cour > 8000 : rem si on a déja tiré au moins une fois
+t=0
+   for t =0 to 15
+   if Goliath_bal_life(Goliath_bal_en_cour-t-8000) > 0
+   move object Goliath_bal_en_cour-t+1,30
+
+   sc_updateobject Goliath_bal_en_cour-t+1
+   dec Goliath_bal_life(Goliath_bal_en_cour-t-8000)
+   else
+   position object Goliath_bal_en_cour-t+1,0,90000000,0
+   hide object Goliath_bal_en_cour-t+1
+   endif
+   next t
+endif
+
+t= 0
+for t= 8000 to 8000+Goliath_nb_bal-32
+if Goliath_bal_life(t-8000) <= 0 then  hide object t+1 : position object t+1,0,90000000,0
+if Goliath_bal_life(t-8000) > 0
+   move object t+1,30
+   sc_updateobject t+1
+   dec Goliath_bal_life(t-8000)
+    for i= 0 to nbbot-1
+    Gholiath_collide = sc_objectcollision(t+1,Bot(i).objet)
+    if Gholiath_collide > 0 then exit
+    next i
+   if Gholiath_collide > 0 then dec Bot(i).Vie,rnd(50) : Goliath_bal_life(t-8000) = 0
+endif
+next t
+
+
+
+return

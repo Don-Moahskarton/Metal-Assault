@@ -1,0 +1,358 @@
+Rem *** Include File: Config_arme.dba ***
+Rem Created: 28/05/2008 07:03:30
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Config_arme:
+show mouse
+show mouse
+set text size 24
+set text to bold
+set image colorkey 0,0,0
+set dir CheminMA$+"\Jpegs\Jeu\market"
+load image "menu.jpg",17,1
+load image "Element.jpg",18,1
+
+
+set dir CheminMA$+"\Jpegs\Jeu\market"
+load image "menu.jpg",17,1
+load image "Element.jpg",18,1
+
+
+for t = 0 to 100
+if game_arme_embaquee(t) = 1
+select t
+
+case 10
+do
+paste image 17,0,0
+sprite 18,0,0,18
+
+set cursor 0,param(36)-100
+ink rgb(255,255,255),0
+print "Solde (initiale) : ",Player_stats(0)
+ink rgb(0,0,0),0
+set cursor 304,15
+set text size 72
+ink rgb(30,30,30),0
+print listarme(t).name$
+ink rgb(0,0,0),0
+set text size 24
+
+set cursor 250,170
+if Glock_17_Silencieux = 1
+   ink rgb(255,0,0),0
+   print "Silencieux  (100 €)"
+   ink rgb(0,0,0),0
+else
+   print "Silencieux  (100 €)"
+endif
+
+
+if boutton2(227,156,400,200)
+if Glock_17_Silencieux = 1
+do
+if mouseclick() =  0 then exit
+loop
+Glock_17_Silencieux = 0
+else
+do
+if mouseclick() =  0 then exit
+loop
+Glock_17_Silencieux = 1
+endif
+endif
+
+if boutton2(750,690,1015,758)
+   do
+   if mouseclick() =  0 then exit
+   loop
+   exit
+endif
+
+loop
+if sprite exist(18) then delete sprite 18
+if sprite exist(19) then delete sprite 19
+if sprite exist(20) then delete sprite 20
+if sprite exist(21) then delete sprite 21
+endcase
+
+case 40
+do
+paste image 17,0,0
+sprite 18,0,0,18
+sprite 19,0,200,18
+sprite 20,0,400,18
+sprite 21,400,130,18
+
+set cursor 0,param(36)-100
+ink rgb(255,255,255),0
+print "Solde (initiale) : ",Player_stats(0)
+ink rgb(0,0,0),0
+set cursor 304,15
+set text size 72
+ink rgb(30,30,30),0
+print listarme(t).name$
+ink rgb(0,0,0),0
+set text size 24
+
+set cursor 250,170
+if Famas_Silencieux = 1
+   ink rgb(255,0,0),0
+   print "Silencieux  (300 €)"
+   ink rgb(0,0,0),0
+else
+   print "Silencieux  (300 €)"
+endif
+
+set cursor 250,380
+if Famas_Lazer = 1
+   ink rgb(255,0,0),0
+   print "Lazer  (350 €)"
+   ink rgb(0,0,0),0
+else
+   print "Lazer  (350 €)"
+endif
+
+set cursor 250,580
+if Famas_ACOG = 1
+   ink rgb(255,0,0),0
+   print "Viseur A.C.O.G.  (500 €)"
+   ink rgb(0,0,0),0
+else
+   print "Viseur A.C.O.G.  (500 €)"
+endif
+
+set cursor 650,300
+if Famas_Vlourd = 1
+   ink rgb(255,0,0),0
+   print "Version Lourde  (1500 €)"
+   ink rgb(0,0,0),0
+else
+   print "Version Lourde  (1500 €)"
+endif
+
+if boutton2(227,156,400,200)
+   if Famas_Silencieux = 1
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Silencieux = 0
+   else
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Silencieux = 1
+   endif
+endif
+
+if boutton2(227,356,400,400)
+   if Famas_Lazer = 1
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Lazer = 0
+   else
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Lazer = 1
+      Famas_ACOG = 0
+   endif
+endif
+
+if boutton2(227,556,400,600)
+   if Famas_ACOG = 1
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_ACOG = 0
+   else
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_ACOG = 1
+      Famas_Lazer = 0
+   endif
+endif
+
+if boutton2(627,286,830,330)
+   if Famas_Vlourd = 1
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Vlourd = 0
+   else
+      do
+      if mouseclick() =  0 then exit
+      loop
+      Famas_Vlourd = 1
+   endif
+endif
+
+if boutton2(750,690,1015,758)
+   do
+   if mouseclick() =  0 then exit
+   loop
+   exit
+endif
+
+loop
+if sprite exist(18) then delete sprite 18
+if sprite exist(19) then delete sprite 19
+if sprite exist(20) then delete sprite 20
+if sprite exist(21) then delete sprite 21
+endcase
+
+case 41
+do
+paste image 17,0,0
+sprite 18,0,0,18
+sprite 19,0,200,18
+
+set cursor 0,param(36)-100
+ink rgb(255,255,255),0
+print "Solde (initiale) : ",Player_stats(0)
+ink rgb(0,0,0),0
+set cursor 304,15
+set text size 72
+ink rgb(30,30,30),0
+print listarme(t).name$
+ink rgb(0,0,0),0
+set text size 24
+
+set cursor 250,170
+if Ak_74_Silencieux = 1
+   ink rgb(255,0,0),0
+   print "Silencieux  (300 €)"
+   ink rgb(0,0,0),0
+else
+   print "Silencieux  (300 €)"
+endif
+
+set cursor 250,380
+if AK_74_Lazer = 1
+   ink rgb(255,0,0),0
+   print "Lazer  (300 €)"
+   ink rgb(0,0,0),0
+else
+   print "Lazer  (300 €)"
+endif
+
+if boutton2(227,156,400,200)
+if Ak_74_Silencieux = 1
+do
+if mouseclick() =  0 then exit
+loop
+Ak_74_Silencieux = 0
+else
+do
+if mouseclick() =  0 then exit
+loop
+Ak_74_Silencieux = 1
+endif
+endif
+
+if boutton2(227,356,400,400)
+   if AK_74_Lazer = 1
+      do
+      if mouseclick() =  0 then exit
+      loop
+      AK_74_Lazer = 0
+   else
+      do
+      if mouseclick() =  0 then exit
+      loop
+      AK_74_Lazer = 1
+   endif
+endif
+
+if boutton2(750,690,1015,758)
+   do
+   if mouseclick() =  0 then exit
+   loop
+   exit
+endif
+
+loop
+if sprite exist(18) then delete sprite 18
+if sprite exist(19) then delete sprite 19
+if sprite exist(20) then delete sprite 20
+if sprite exist(21) then delete sprite 21
+endcase
+
+case 70
+do
+paste image 17,0,0
+sprite 18,0,0,18
+set cursor 0,param(36)-100
+ink rgb(255,255,255),0
+print "Solde (initiale) : ",Player_stats(0)
+ink rgb(0,0,0),0
+
+set cursor 304,15
+set text size 72
+ink rgb(30,30,30),0
+print listarme(t).name$
+ink rgb(0,0,0),0
+set text size 24
+
+set cursor 250,170
+if CsniperR_Silencieux = 1
+   ink rgb(255,0,0),0
+   print "Silencieux  (1800 €)"
+   ink rgb(0,0,0),0
+else
+   print "Silencieux  (1800 €)"
+endif
+
+if boutton2(227,156,400,200)
+if CsniperR_Silencieux = 1
+do
+if mouseclick() =  0 then exit
+loop
+CsniperR_Silencieux = 0
+else
+do
+if mouseclick() =  0 then exit
+loop
+CsniperR_Silencieux = 1
+endif
+endif
+
+if boutton2(750,690,1015,758)
+   do
+   if mouseclick() =  0 then exit
+   loop
+   exit
+endif
+
+loop
+endcase
+
+endselect
+endif
+next t
+
+
+if sprite exist(18) then delete sprite 18
+if sprite exist(19) then delete sprite 19
+if sprite exist(20) then delete sprite 20
+if sprite exist(21) then delete sprite 21
+hide mouse
+delete image 17
+delete image 18
+set text size 12
+set text to normal
+
+if Glock_17_Silencieux = 1 then dec Player_stats(0),100
+if Famas_Silencieux = 1 then dec Player_stats(0),300
+if Famas_Lazer = 1 then dec Player_stats(0),350
+if Famas_ACOG = 1 then dec Player_stats(0),500
+if Famas_Vlourd = 1 then dec Player_stats(0),1500
+if Ak_74_Silencieux = 1 then dec Player_stats(0),300
+if Ak_74_lazer = 1 then dec Player_stats(0),300
+if CsniperR_Silencieux = 1 then dec Player_stats(0),1800
+set dir CheminMA$+"\configs\"+Configjoueur$
+delete file "stats.txt"
+save array "Stats.txt",Player_stats(10)
+return

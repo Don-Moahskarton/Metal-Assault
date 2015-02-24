@@ -1,0 +1,89 @@
+Rem *** Include File: Bases de données.dba ***
+Rem Created: 25/06/2008 12:04:10
+
+Rem Included in Project: E:\DBP\Projects\Metal Assault\Metal Assault.dbpro
+Setup_database:
+i = 0
+nomhumain$(i) = "Roger"
+inc i
+nomhumain$(i) = "Robert"
+inc i
+nomhumain$(i) = "bertrand"
+inc i
+nomhumain$(i) = "gugus"
+inc i
+nomhumain$(i) = "Anonyme"
+inc i
+nomhumain$(i) = "Antoine"
+inc i
+nomhumain$(i) = "Gurvan"
+inc i
+nomhumain$(i) = "Colomban"
+inc i
+nomhumain$(i) = "Edouard"
+inc i
+nomhumain$(i) = "Marc"
+inc i
+nomhumain$(i) = "marin"
+inc i
+nomhumain$(i) = "Charles"
+inc i
+nomhumain$(i) = "Philipe"
+inc i
+nomhumain$(i) = "Roland"
+inc i
+nomhumain$(i) = "louis"
+inc i
+nomhumain$(i) = "Kevin"
+inc i
+nomhumain$(i) = "Paul"
+inc i
+nomhumain$(i) = "Damien"
+inc i
+nomhumain$(i) = "Raphael"
+inc i
+nomhumain$(i) = "Malrick"
+inc i
+nomhumain$(i) = "Romain"
+inc i
+nomhumain$(i) = "Pierre"
+inc i
+nomhumain$(i) = "Marie"
+inc i
+nomhumain$(i) = "Steven"
+inc i
+nomhumain$(i) = "Thomas"
+inc i
+nomhumain$(i) = "Alexandre"
+inc i
+nomhumain$(i) = "Yann"
+inc i
+nomhumain$(i) = "Gilles"
+inc i
+nomhumain$(i) = "Alain"
+inc i
+nomhumain$(i) = "Mathéo"
+inc i
+nomhumain$(i) = "Mahius"
+inc i
+nomhumain$(i) = "tristan"
+inc i
+nomhumain$(i) = "Olivier"
+inc i
+nomhumain$(i) = "Martin"
+inc i
+nomhumain$(i) = "Nicolas"
+inc i
+nomhumain$(i) = "Roméo"
+inc i
+nomhumain$(i) = "Matthieu"
+inc i
+nomhumain$(i) = "Jason"
+inc i
+nomhumain$(i) = "jean"
+inc i
+nomhumain$(i) = "Hervé"
+inc i
+nomhumain$(i) = "Stéphane"
+inc i
+return
