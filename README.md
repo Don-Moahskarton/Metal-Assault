@@ -1,8 +1,6 @@
-# Metal-Assault
+# Welcome to Metal-Assault ! #
 Video game started when I was 12 years old, and left at 15yo.
 It is an FPS made with Dark BASIC Professional.
-  
-  hfcjmohvgchjlkù
   
 ### How to launch the game ? ###
 Just run /Metal-Assault/Metal-Assault.exe once you've got the repo on your hard drive.
